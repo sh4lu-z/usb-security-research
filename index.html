@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A comprehensive deep-dive research into USB Security, BadUSB, and USB Killers.">
+    <meta name="author" content="Sh4lu_z & Dev-Kuppiya Team">
+    <title>USB Security Research: The Deep Dive | Part 01</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ================================================================
+           PART 1: CORE CSS STYLING (THE MATRIX / CYBERPUNK THEME)
+           ================================================================
+           අපි මේ වෙබ් පිටුවට "Cyber Security Research" ලුක් එකක් දෙන්න
+           Dark Mode සහ Neon Colors පාවිච්චි කරනවා.
+        */
+
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #e0e0e0;
+            --accent-green: #00ff41; /* Hacker Green */
+            --accent-red: #ff3333;   /* Warning Red */
+            --accent-blue: #00d9ff;  /* Cyber Blue */
+            --panel-bg: #111111;
+            --border-color: #333333;
+            --code-bg: #1a1a1a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Rajdhani', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* SCROLLBAR STYLING */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 5px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-green);
+        }
+
+        /* HEADER SECTION */
+        header {
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(10,10,10,0.95) 100%);
+            border-bottom: 2px solid var(--accent-green);
+            padding: 40px 20px;
+            text-align: center;
+            position: relative;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: var(--accent-green);
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-blue);
+            font-size: 1.2rem;
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* SECTIONS */
+        section {
+            margin-bottom: 60px;
+            padding: 30px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--accent-blue);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
+
+        section:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-green);
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--accent-blue);
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: var(--text-color);
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            text-align: justify;
+        }
+
+        /* BILINGUAL SUPPORT (SINHALA & ENGLISH) */
+        .en-text {
+            color: #cccccc;
+            margin-bottom: 10px;
+        }
+
+        .si-text {
+            color: #ffffff;
+            font-family: 'FMMalithi', 'Iskoola Pota', sans-serif; /* Sinhala Fonts */
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid var(--accent-green);
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+
+        /* CODE BLOCKS */
+        pre {
+            background-color: var(--code-bg);
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            margin: 20px 0;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent-green);
+        }
+
+        /* IMAGES & DIAGRAMS PLACEHOLDERS */
+        .img-placeholder {
+            width: 100%;
+            height: 300px;
+            background-color: #000;
+            border: 1px dashed var(--accent-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-blue);
+            font-family: 'JetBrains Mono', monospace;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .img-caption {
+            font-size: 0.9rem;
+            color: #888;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* ALERT BOXES */
+        .alert {
+            background-color: rgba(255, 51, 51, 0.1);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .alert strong {
+            font-size: 1.2rem;
+        }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 50px 0;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: 50px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>USB ARSENAL</h1>
+        <p>PROJECT: DEEP DIVE RESEARCH | DOC_ID: 001</p>
+        <p style="font-size: 1rem; margin-top: 10px;">[ AUTHOR: SH4LU_Z ]</p>
+    </header>
+
+    <div class="container">
+
+        <div class="alert">
+            <span style="font-size: 2rem;">⚠️</span>
+            <div>
+                <strong>WARNING / අවවාදයයි:</strong>
+                <br>
+                This document contains advanced research on hardware security. The techniques described (BadUSB, USB Killers) can cause permanent hardware damage and data loss. This is strictly for educational purposes.
+                <br><br>
+                මෙම ලේඛනයේ අඩංගු වන්නේ දෘඩාංග ආරක්ෂාව (Hardware Security) පිළිබඳ ගැඹුරු පර්යේෂණ තොරතුරු වේ. මෙහි විස්තර වන BadUSB සහ USB Killer වැනි උපකරණ මගින් පරිගණක වලට ස්ථිර හානි සිදුවිය හැක. මෙය හුදෙක් අධ්‍යාපනික අරමුණු සඳහා පමණි.
+            </div>
+        </div>
+
+        <section id="chapter-1">
+            <h2>01. The Anatomy of Trust: Why USB is Vulnerable?</h2>
+            
+            <div class="en-text">
+                <p>To understand BadUSB and USB Killers, we must first understand the fundamental flaw in the Universal Serial Bus (USB) protocol. The USB protocol was designed with convenience as its primary goal, not security. When you plug a device in, the computer blindly asks, "What are you?" and the device replies, "I am a Keyboard." The computer trusts this claim implicitly.</p>
+            </div>
+
+            <div class="si-text">
+                <p><strong>01. විශ්වාසයේ පදනම: ඇයි USB අනාරක්ෂිත?</strong><br>
+                BadUSB සහ USB Killer ගැන කතා කරන්න කලින්, අපි තේරුම් ගන්න ඕනේ USB (Universal Serial Bus) තාක්ෂණයේ තියෙන මූලික දුර්වලතාවය මොකක්ද කියලා. USB හැදුවේ අපේ වැඩ ලේසි කරන්න මිසක්, ආරක්ෂාව (Security) ගැන හිතලා නෙවෙයි. ඔයා පෙන් එකක් හෝ ඩිවයිස් එකක් කම්පියුටර් එකට ගැහුවම, කම්පියුටර් එක ඒ ඩිවයිස් එකෙන් අහනවා "ඔයා කවුද?" කියලා. ඩිවයිස් එක කිව්වොත් "මම කීබෝඩ් එකක්" කියලා, කම්පියුටර් එක ඒක 100% ක් විශ්වාස කරනවා. අන්න ඒ "අන්ධ විශ්වාසය" (Blind Trust) තමයි මේ හැම ප්‍රහාරයකටම මුල.</p>
+            </div>
+
+            <div class="img-placeholder">
+                [ DIAGRAM: THE USB HANDSHAKE PROTOCOL ]<br>
+                (PC) ---> "Who are you?" ---> (DEVICE)<br>
+                (PC) <--- "I am a Keyboard" <--- (DEVICE)<br>
+                (PC) ---> "Access Granted" ---> (DEVICE)
+            </div>
+            <p class="img-caption">Figure 1.1: The Human Interface Device (HID) Trust Model.</p>
+
+            <div class="en-text">
+                <p>This vulnerability relates specifically to the <strong>HID (Human Interface Device)</strong> class. Keyboards and Mice are HIDs. Because operating systems (Windows, Linux, macOS) are designed to be user-friendly, they automatically install drivers for HIDs without asking for permission. This is the gateway for BadUSB attacks.</p>
+            </div>
+
+            <div class="si-text">
+                <p>මේ දුර්වලතාවය විශේෂයෙන්ම බලපාන්නේ <strong>HID (Human Interface Device)</strong> කියන කාණ්ඩයට. කීබෝඩ් සහ මවුස් අයිති වෙන්නේ මේකට. වින්ඩෝස්, ලිනක්ස් වගේ OS හදලා තියෙන්නේ යූසර්ට ලේසි වෙන්න නිසා, HID ඩිවයිස් එකක් ගැහුව ගමන් අපෙන් අහන්නේ නැතුවම ඒකේ ඩ්‍රයිවර්ස් ඉන්ස්ටෝල් කරගන්නවා. BadUSB එකක් පරිගණකයට රිංගන්නේ අන්න ඒ විවෘත දොරෙන්.</p>
+            </div>
+        </section>
+
+        <section id="chapter-2">
+            <h2>02. The Two Monsters: BadUSB vs. USB Killer</h2>
+            
+            <div class="en-text">
+                <p>In the world of hardware hacking, two devices reign supreme, often confused by beginners. One destroys your data (Software), and the other destroys your machine (Hardware).</p>
+                <ul>
+                    <li><strong>BadUSB (The Spy):</strong> A wolf in sheep's clothing. It looks like a storage drive but acts like a keyboard to inject malicious commands.</li>
+                    <li><strong>USB Killer (The Destroyer):</strong> A power surge weapon. It collects power from the USB port and fires it back at high voltage to fry the motherboard.</li>
+                </ul>
+            </div>
+
+            <div class="si-text">
+                <p><strong>02. යක්ෂයින් දෙදෙනා: BadUSB සහ USB Killer</strong><br>
+                හාඩ්වෙයාර් හැකින් (Hardware Hacking) ලෝකයේ ප්‍රධානම උපාංග දෙකක් තියෙනවා. ගොඩක් අය මේ දෙක පටලවා ගන්නවා. සරලවම කිව්වොත්, එකෙක් විනාශ කරන්නේ ඔයාගේ සොෆ්ට්වෙයාර් (Data), අනිත් එකා විනාශ කරන්නේ ඔයාගේ හාඩ්වෙයාර් (Machine).</p>
+                <ul>
+                    <li><strong>BadUSB (ඔත්තුකරුවා):</strong> මේක හරියට බැටළු හමක් පොරවගත්ත වෘකයෙක් වගේ. පේන්න තියෙන්නේ සාමාන්‍ය පෙන් ඩ්‍රයිව් එකක් වගේ වුණාට, වැඩ කරන්නේ කීබෝඩ් එකක් විදිහට. මේකෙන් වයිරස් දාන්න, පාස්වර්ඩ් උස්සන්න පුළුවන්.</li>
+                    <li><strong>USB Killer (විනාශකරුවා):</strong> මේක විදුලි අවියක්. USB පෝර්ට් එකෙන් කරන්ට් එක අරගෙන, ඒක ඇතුළේ තියෙන කැපෑසිටර් (Capacitors) වල පුරවගෙන, එකපාරටම ලොකු වෝල්ටේජ් එකක් (High Voltage) ආපහු මවුපුවරුවට (Motherboard) විදිනවා. එතකොට මැෂින් එක පිච්චිලා යනවා.</li>
+                </ul>
+            </div>
+
+            <div class="img-placeholder">
+                [ TABLE: COMPARISON CHART ]<br>
+                BadUSB = Software Attack (HID Injection)<br>
+                USB Killer = Hardware Attack (Electrical Surge)<br>
+                Wait for Part 02 for detailed breakdown...
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>DEV-KUPPIYA RESEARCH LABS | PART 01 OF 10 COMPLETED</p>
+        <p>Generating Part 02...</p>
+    </footer>
+
+</body>
+</html>
