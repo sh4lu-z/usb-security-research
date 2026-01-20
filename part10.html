@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The Final Chapter of the USB Security Research Project. Comprehensive defense strategies, legal ethics, and the final certification by Sh4lu_z.">
+    <meta name="author" content="Sh4lu_z">
+    <title>USB Security Research: FINAL REPORT | Part 10</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&family=Orbitron:wght@500;900&family=Michroma&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================================================================================
+           PART 10: THEME - BLUE TEAM DEFENSE CENTER (DEEP BLUE & HOLOGRAPHIC WHITE)
+           ==================================================================================
+           මෙම අවසාන කොටස සඳහා අපි "Cyber Security Operations Center (SOC)" එකක පෙනුම ලබා දෙමු.
+           ගැඹුරු නිල් (Deep Navy), ආරක්ෂිත සුදු (Secure White) සහ රන්වන් (Gold) වර්ණ 
+           භාවිතා කරමින් "අවසාන නිගමනය" සහ "සහතික කිරීම" නිරූපණය කරමු.
+           
+           CSS Line Count: Maximized for detail and animations.
+        */
+
+        :root {
+            --bg-color: #000810;       /* Deepest Navy Blue */
+            --defense-blue: #00aaff;   /* Shield Blue */
+            --secure-white: #f0f8ff;   /* Holographic White */
+            --gold-seal: #ffd700;      /* Certification Gold */
+            --alert-red: #ff3333;      /* Threat Red */
+            --safe-green: #00ff66;     /* Safe Green */
+            
+            --glass-panel: rgba(0, 20, 40, 0.8);
+            --border-glow: 0 0 15px rgba(0, 170, 255, 0.3);
+        }
+
+        /* ------------------------------------------------------------------
+           GLOBAL RESET & LAYOUT ENGINE
+           ------------------------------------------------------------------
+        */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--secure-white);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 18px;
+            line-height: 1.8;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(0, 170, 255, 0.05) 0%, transparent 60%),
+                linear-gradient(0deg, rgba(0,0,0,0.2) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 4px; /* Scanlines */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ------------------------------------------------------------------
+           ANIMATIONS & KEYFRAMES (FOR THE SEAL & UI)
+           ------------------------------------------------------------------
+        */
+        @keyframes scan-sweep {
+            0% { top: -10%; opacity: 0; }
+            50% { opacity: 1; box-shadow: 0 0 50px var(--defense-blue); }
+            100% { top: 110%; opacity: 0; }
+        }
+
+        @keyframes shield-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 170, 255, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(0, 170, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 170, 255, 0); }
+        }
+
+        @keyframes gold-shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
+        @keyframes rotate-seal {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ------------------------------------------------------------------
+           HEADER SECTION: THE FINAL REPORT
+           ------------------------------------------------------------------
+        */
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            border-bottom: 4px solid var(--defense-blue);
+            background: linear-gradient(180deg, rgba(0,0,0,0.8), rgba(0,10,20,1));
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/cubes.png');
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .header-badge {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            color: var(--defense-blue);
+            border: 1px solid var(--defense-blue);
+            padding: 10px 30px;
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            box-shadow: var(--border-glow);
+        }
+
+        header h1 {
+            font-family: 'Michroma', sans-serif;
+            font-size: 5rem;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #fff, #00aaff, #fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px rgba(0, 170, 255, 0.5));
+        }
+
+        header p {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5rem;
+            color: #88ccff;
+            max-width: 800px;
+        }
+
+        .scroll-down {
+            position: absolute;
+            bottom: 40px;
+            color: var(--defense-blue);
+            font-size: 2rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-20px);}
+            60% {transform: translateY(-10px);}
+        }
+
+        /* ------------------------------------------------------------------
+           SECTION STYLING: CARDS & GRIDS
+           ------------------------------------------------------------------
+        */
+        section {
+            padding: 100px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+        }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: var(--defense-blue);
+            margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .section-title::before {
+            content: "";
+            display: block;
+            width: 10px;
+            height: 40px;
+            background: var(--defense-blue);
+            box-shadow: 0 0 15px var(--defense-blue);
+        }
+
+        .content-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .content-wrapper { grid-template-columns: 1fr; }
+        }
+
+        /* TEXT BOXES */
+        .text-box {
+            background: var(--glass-panel);
+            padding: 30px;
+            border-left: 3px solid var(--defense-blue);
+            border-radius: 0 20px 20px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .en-text {
+            color: #d0e8ff;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .si-text {
+            color: #ffffff;
+            font-family: 'Iskoola Pota', sans-serif;
+            background: linear-gradient(90deg, rgba(0, 170, 255, 0.1), transparent);
+            padding: 20px;
+            border-left: 3px solid var(--gold-seal);
+            line-height: 2;
+        }
+
+        /* ------------------------------------------------------------------
+           TECHNICAL ELEMENTS: CODE BLOCKS & REGISTRY
+           ------------------------------------------------------------------
+        */
+        .tech-display {
+            background: #050505;
+            border: 1px solid #333;
+            padding: 0;
+            border-radius: 5px;
+            overflow: hidden;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .tech-header {
+            background: #111;
+            padding: 10px 20px;
+            border-bottom: 1px solid #333;
+            color: #888;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .tech-body {
+            padding: 20px;
+            color: var(--safe-green);
+            white-space: pre-wrap;
+        }
+
+        .registry-key { color: #ff79c6; }
+        .registry-val { color: #f1fa8c; }
+
+        /* ------------------------------------------------------------------
+           DEFENSE STRATEGY CARDS
+           ------------------------------------------------------------------
+        */
+        .defense-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .defense-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .defense-card:hover {
+            border-color: var(--defense-blue);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: var(--defense-blue);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 10px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* ------------------------------------------------------------------
+           THE FINAL SEAL: SH4LU_Z SIGNATURE
+           ------------------------------------------------------------------
+        */
+        .final-seal-section {
+            padding: 150px 0;
+            text-align: center;
+            background: radial-gradient(circle at center, #001a33 0%, #000 70%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .seal-container {
+            display: inline-block;
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+
+        .seal-ring {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            border: 5px dashed var(--gold-seal);
+            border-radius: 50%;
+            animation: rotate-seal 20s linear infinite;
+            opacity: 0.5;
+        }
+
+        .seal-inner {
+            position: absolute;
+            top: 20px; left: 20px; right: 20px; bottom: 20px;
+            border: 2px solid var(--gold-seal);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.8);
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.2);
+            backdrop-filter: blur(5px);
+        }
+
+        .seal-text {
+            color: var(--gold-seal);
+            font-family: 'Cinzel', serif; /* Or Orbitron as fallback */
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .seal-name {
+            font-size: 3rem;
+            margin: 10px 0;
+            background: linear-gradient(45deg, #ffd700, #fff, #ffd700);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gold-shimmer 3s linear infinite;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .verified-badge {
+            background: var(--gold-seal);
+            color: #000;
+            padding: 5px 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+
+        /* FOOTER */
+        footer {
+            border-top: 1px solid #333;
+            padding: 50px 0;
+            text-align: center;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-badge">PROJECT COMPLETE</div>
+        <h1>THE ULTIMATE<br>USB SECURITY<br>ENCYCLOPEDIA</h1>
+        <p>10 PARTS | 20+ ATTACK VECTORS | COMPREHENSIVE DEFENSE STRATEGIES</p>
+        <p style="margin-top: 20px; color: var(--gold-seal);">FINAL REPORT SUBMITTED BY SH4LU_Z</p>
+        <div class="scroll-down">↓</div>
+    </header>
+
+    <div class="container">
+
+        <section id="recap">
+            <div class="section-title">40. PROJECT SUMMARY (සාරාංශය)</div>
+            
+            <div class="content-wrapper">
+                <div class="text-box">
+                    <div class="en-text">
+                        <p>We have traveled a long path. From understanding the hardware flaws in <strong>Part 01</strong>, to building high-voltage killers in <strong>Part 03</strong>, and turning our Android phones into weapons in <strong>Part 09</strong>. We explored the offensive capabilities not to destroy, but to understand.</p>
+                        <p>Now, we must answer the most important question: <strong>How do we stop this?</strong></p>
+                    </div>
+                    <div class="si-text">
+                        <p><strong>40. අප ආ ගමන් මග</strong><br>
+                        අපි අති විශාල ගමනක් ආවා. <strong>Part 01</strong> හිදී USB වල දුර්වලතා හඳුනාගැනීමේ සිට, <strong>Part 03</strong> හිදී වෝල්ටීයතාවයෙන් පහර දෙන USB Killer ගැනත්, <strong>Part 09</strong> හිදී ඇන්ඩ්‍රොයිඩ් ෆෝන් එක ආයුධයක් කරගන්නා හැටිත් අපි ඉගෙන ගත්තා. අපි මේ හැමදේම ඉගෙන ගත්තේ විනාශ කරන්න නෙවෙයි, තේරුම් ගන්න.<br>
+                        දැන් අපිට ඉතුරු වෙලා තියෙන්නේ වැදගත්ම ප්‍රශ්නයයි: <strong>"අපි කොහොමද මේවායින් බේරෙන්නේ?"</strong></p>
+                    </div>
+                </div>
+                <div class="tech-display">
+                    <div class="tech-header">PROJECT_LOG.TXT</div>
+                    <div class="tech-body">
+[LOG] Part 01: Vulnerability Assessment .... [COMPLETE]
+[LOG] Part 02: Hardware Architecture ....... [COMPLETE]
+[LOG] Part 03: High Voltage Physics ........ [COMPLETE]
+[LOG] Part 04: Safe Lab Environment ........ [COMPLETE]
+[LOG] Part 05: Digispark Engineering ....... [COMPLETE]
+[LOG] Part 06: Data Exfiltration ........... [COMPLETE]
+[LOG] Part 07: AV Evasion Techniques ....... [COMPLETE]
+[LOG] Part 08: Pranks & Automation ......... [COMPLETE]
+[LOG] Part 09: Android HID Attacks ......... [COMPLETE]
+[LOG] Part 10: Final Defense Strategy ...... [INITIATING...]</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="software-defense">
+            <div class="section-title">41. SOFTWARE DEFENSE (මෘදුකාංග ආරක්ෂාව)</div>
+            
+            <div class="defense-grid">
+                <div class="defense-card">
+                    <div class="card-icon">🔐</div>
+                    <div class="card-title">REGISTRY LOCK</div>
+                    <div class="en-text">
+                        The quickest way to disable USB Storage on a Windows PC is via the Registry. This prevents files from being copied, but might not stop keyboards (BadUSB).
+                    </div>
+                    <div class="si-text">
+                        වින්ඩෝස් රෙජිස්ට්‍රි එක හරහා USB ස්ටෝරේජ් බ්ලොක් කිරීම. මේකෙන් පෙන් ඩ්‍රයිව් වැඩ කරන්නේ නෑ.
+                    </div>
+                </div>
+
+                <div class="defense-card">
+                    <div class="card-icon">🏢</div>
+                    <div class="card-title">GROUP POLICY (GPO)</div>
+                    <div class="en-text">
+                        For organizations, GPO is the standard. You can whitelist specific Hardware IDs (VID/PID) so only company-approved mouse/keyboards work.
+                    </div>
+                    <div class="si-text">
+                        ආයතන සඳහා හොඳම ක්‍රමය GPO යි. මේකෙන් පුළුවන් කම්පැණියේ මවුස්/කීබෝඩ් විතරක් වැඩ කරන්න හදන්න.
+                    </div>
+                </div>
+
+                <div class="defense-card">
+                    <div class="card-icon">🐧</div>
+                    <div class="card-title">LINUX USBGUARD</div>
+                    <div class="en-text">
+                        On Linux, `USBGuard` allows you to create policies based on device capability. You can block any device that claims to be a keyboard if it wasn't there at boot.
+                    </div>
+                    <div class="si-text">
+                        ලිනක්ස් වලදී `USBGuard` පාවිච්චි කරලා අමුතු ඩිවයිස් ඔටෝමැටික් බ්ලොක් කරන්න පුළුවන්.
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px;">
+                <div class="tech-display">
+                    <div class="tech-header">WINDOWS_REGISTRY_HACK.REG</div>
+                    <div class="tech-body">
+Windows Registry Editor Version 5.00
+
+<span style="color: #888;">; This disables USB Mass Storage Drivers</span>
+[HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\USBSTOR]
+"Start"=<span class="registry-key">dword:00000004</span>
+
+<span style="color: #888;">; Value 3 = Enabled (Normal)</span>
+<span style="color: #888;">; Value 4 = Disabled (Blocked)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="hardware-defense">
+            <div class="section-title">42. HARDWARE DEFENSE (භෞතික ආරක්ෂාව)</div>
+            
+            <div class="content-wrapper">
+                <div class="text-box">
+                    <div class="en-text">
+                        <p>Software cannot stop a <strong>USB Killer</strong>. If 200V hits the port, the software has no time to react. The defense must be physical.</p>
+                        <ul>
+                            <li><strong>USB Port Locks:</strong> Physical plugs that key into the USB port, preventing anything from being inserted.</li>
+                            <li><strong>Epoxy Resin:</strong> In extreme secure facilities, unused USB ports are permanently filled with glue/epoxy.</li>
+                            <li><strong>Opto-Isolators:</strong> Special USB hubs that use light to transmit data, electrically separating the device from the PC. This stops the voltage spike.</li>
+                        </ul>
+                    </div>
+                    <div class="si-text">
+                        <p><strong>42. භෞතිකව ආරක්ෂා වීම</strong><br>
+                        මතක තියාගන්න, සොෆ්ට්වෙයාර් වලට බැහැ <strong>USB Killer</strong> එකක් නවත්වන්න. වෝල්ට් 200ක් ආවම සොෆ්ට්වෙයාර් එකට හිතන්න වෙලාවක් නෑ.<br>
+                        1. <strong>USB Port Locks:</strong> යතුරක් දාලා ලොක් කරන ප්ලාස්ටික් කෑලි. මේවා දැම්මම පෝර්ට් එකට මුකුත් ගහන්න බෑ.<br>
+                        2. <strong>Epoxy (ගම් දැමීම):</strong> හයි සෙක්යුරිටි තැන්වල පෝර්ට් වලට කෙළින්ම ගම් පුරවලා වහලා දානවා.<br>
+                        3. <strong>Opto-Isolators:</strong> මේවා විශේෂ හබ් (Hubs). මේවා ඩේටා යවන්නේ ලයිට් එළියෙන්. කරන්ට් එක පාස් වෙන්නේ නෑ. USB Killer එකක් ගැහුවොත් හබ් එක පිච්චෙයි, PC එක බේරෙයි.</p>
+                    </div>
+                </div>
+
+                <div class="tech-display">
+                    <div class="tech-header">SCHEMATIC: OPTO-ISOLATOR DEFENSE</div>
+                    <div class="tech-body">
+    [ BAD DEVICE ] (200V Surge)
+          |
+          v
+    [ ISOLATOR HUB SIDE A ] --- (Surge stops here) -> 🔥
+          |
+    (Light Beam / Optical Data)
+          |
+    [ ISOLATOR HUB SIDE B ]
+          |
+          v
+    [ PROTECTED PC ] (Safe) ✅
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="ethics">
+            <div class="section-title">43. ETHICS & THE LAW (නීතිය සහ ධර්මය)</div>
+            
+            <div class="defense-grid">
+                <div class="defense-card" style="border-color: var(--alert-red);">
+                    <div class="card-icon">⚖️</div>
+                    <div class="card-title">THE COMPUTER CRIMES ACT</div>
+                    <div class="en-text">
+                        In Sri Lanka (Computer Crimes Act No. 24 of 2007) and globally, unauthorized access is a jail-able offense. Plugging a BadUSB into a machine you don't own is illegal.
+                    </div>
+                    <div class="si-text">
+                        ලංකාවේ 2007 අංක 24 දරණ පරිගණක අපරාධ පනත යටතේ, අනුන්ගේ පරිගණකයකට අවසර නැතුව ඇතුළු වීම හිරේ යන වරදක්. BadUSB එකක් යාළුවෙක්ට ගැහුවත්, ඒක නීතිය ඉස්සරහ "Hacking" එකක්.
+                    </div>
+                </div>
+
+                <div class="defense-card" style="border-color: var(--safe-green);">
+                    <div class="card-icon">🛡️</div>
+                    <div class="card-title">WHITE HAT VS BLACK HAT</div>
+                    <div class="en-text">
+                        <strong>White Hat:</strong> You have permission. You test to fix. (This guide is for you).<br>
+                        <strong>Black Hat:</strong> You have no permission. You test to destroy. (You go to jail).
+                    </div>
+                    <div class="si-text">
+                        <strong>White Hat:</strong> අවසර ඇතුව කරන අය. (අපි ඉන්නේ මෙතන).<br>
+                        <strong>Black Hat:</strong> හොරෙන් කරන අය. (මේ අයට හිරේ ලගිනවා).
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusion">
+            <div class="section-title">44. THE FINAL VERDICT (අවසාන නිගමනය)</div>
+            
+            <div class="content-wrapper">
+                <div class="text-box" style="width: 100%; border-left-color: var(--secure-white);">
+                    <div class="en-text">
+                        <p>We started this journey to demystify the magic of USB hacking. We learned that "Trust" is the biggest vulnerability. Computers trust keyboards too much. Hardware trusts power sources too much.</p>
+                        <p>As a researcher or enthusiast, your job is not to use these tools to harm, but to educate. Build a BadUSB to show your boss why the company needs better security. Build a USB Killer detector to save hardware.</p>
+                        <p>Knowledge is a weapon. How you wield it determines whether you are a soldier or a criminal.</p>
+                    </div>
+                    <div class="si-text">
+                        <p><strong>44. අවසාන වචනය</strong><br>
+                        අපි මේ ගමන පටන් ගත්තේ USB හැකින් වල තියෙන මැජික් එක තේරුම් ගන්න. අපි ඉගෙන ගත්තා ලොකුම දුර්වලකම "විශ්වාසය" (Trust) කියලා. කම්පියුටර් කීබෝඩ් එක ඕනවට වඩා විශ්වාස කරනවා.<br><br>
+                        ඔයාගේ වගකීම වෙන්න ඕනේ මේ දැනුම පාවිච්චි කරලා අනුන්ට හානි කරන එක නෙවෙයි, සමාජය දැනුවත් කරන එක. මේ ටූල්ස් හදලා පෙන්නන්න "ඇයි අපිට ආරක්ෂාව ඕනේ?" කියලා.<br><br>
+                        දැනුම කියන්නේ ආයුධයක්. ඒක පාවිච්චි කරන විදිහ අනුව තමයි තීරණය වෙන්නේ ඔයා වීරයෙක්ද නැත්නම් අපරාධකාරයෙක්ද කියන එක.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="final-seal-section">
+            <div class="seal-container">
+                <div class="seal-ring"></div>
+                <div class="seal-inner">
+                    <div class="seal-text">CERTIFIED BY</div>
+                    <div class="seal-name">SH4LU_Z</div>
+                    <div class="verified-badge">FULL ACCESS GRANTED</div>
+                    <div class="seal-text" style="font-size: 0.7rem; margin-top: 10px;">USB SECURITY RESEARCH</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 50px; font-family: 'Share Tech Mono', monospace; color: #888;">
+                <p>PROJECT COMPLETED SUCCESSFULLY</p>
+                <p>DATE: 2026-01-20</p>
+                <p>END OF FILE</p>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>© 2026 DEV-KUPPIYA RESEARCH LABS | CREATED BY SH4LU_Z</p>
+        <p>This encyclopedia is intended for educational purposes only.</p>
+    </footer>
+
+</body>
+</html>
