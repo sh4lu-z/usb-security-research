@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Part 05: A complete step-by-step guide to building a BadUSB using the cheap Digispark ATtiny85 development board.">
+    <title>USB Security Research: Digispark Guide | Part 05</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Rajdhani:wght@400;600;700&family=Teko:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================================================================================
+           PART 5: BLUEPRINT / ENGINEERING THEME (CYAN & GRID LINES)
+           ==================================================================================
+           මෙම කොටස "Engineering Blueprint" එකක් මෙන් දිස්වීමට අපි නිල් (Cyan) සහ 
+           සුදු වර්ණ භාවිතා කරමු. පසුබිම (Background) Grid Line Pattern එකකින් සරසා ඇත.
+        */
+
+        :root {
+            --bg-color: #00111a;       /* Deep Engineering Blue */
+            --grid-line: rgba(0, 255, 255, 0.1);
+            --text-primary: #e6f7ff;
+            --text-secondary: #80ccff;
+            
+            --blueprint-cyan: #00ffff; /* The main accent color */
+            --blueprint-white: #ffffff;
+            --blueprint-dim: #004d66;
+            
+            --panel-bg: rgba(0, 26, 38, 0.9);
+            --border-color: #006680;
+            
+            --code-bg: #000d14;
+        }
+
+        /* GLOBAL RESET & TYPOGRAPHY */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 18px;
+            line-height: 1.8;
+            /* Engineering Grid Background */
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        /* HEADER SECTION - BLUEPRINT STYLE */
+        header {
+            border: 4px solid var(--blueprint-cyan);
+            padding: 40px;
+            background-color: var(--panel-bg);
+            position: relative;
+            margin-bottom: 60px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.1);
+        }
+
+        /* Decorative Screw Heads on Corners */
+        header::after, header::before, 
+        .screw-bl, .screw-br {
+            content: "+";
+            position: absolute;
+            color: var(--blueprint-cyan);
+            font-size: 20px;
+            font-weight: bold;
+        }
+        header::before { top: 5px; left: 10px; }
+        header::after { top: 5px; right: 10px; }
+        .screw-bl { bottom: 5px; left: 10px; position: absolute; }
+        .screw-br { bottom: 5px; right: 10px; position: absolute; }
+
+        header h1 {
+            color: var(--blueprint-cyan);
+            font-family: 'Teko', sans-serif;
+            font-size: 4.5rem;
+            text-transform: uppercase;
+            line-height: 1;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px var(--blueprint-cyan);
+        }
+
+        header .specs {
+            display: flex;
+            gap: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        /* SECTION STYLING */
+        section {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            margin-bottom: 50px;
+            padding: 40px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        section:hover {
+            border-color: var(--blueprint-cyan);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.05);
+        }
+
+        h2 {
+            font-family: 'Teko', sans-serif;
+            font-size: 2.5rem;
+            color: var(--blueprint-white);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--blueprint-dim);
+            padding-bottom: 10px;
+        }
+
+        h2 span.num {
+            color: var(--blueprint-cyan);
+            margin-right: 15px;
+            font-size: 3rem;
+        }
+
+        /* TEXT BLOCKS */
+        .content-block {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .en-text {
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            text-align: justify;
+            margin-bottom: 10px;
+        }
+
+        .si-text {
+            color: var(--text-primary);
+            font-family: 'Iskoola Pota', sans-serif;
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0.05) 0%, transparent 100%);
+            padding: 20px;
+            border-left: 3px solid var(--blueprint-cyan);
+            line-height: 1.9;
+        }
+
+        /* TECHNICAL DIAGRAMS (ASCII ART) */
+        .blueprint-diagram {
+            background-color: #002b36; /* Blueprint Paper Color */
+            border: 2px solid #fff;
+            padding: 30px;
+            margin: 30px 0;
+            font-family: 'JetBrains Mono', monospace;
+            color: #fff;
+            white-space: pre;
+            overflow-x: auto;
+            position: relative;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .blueprint-diagram::after {
+            content: "FIG 5.X - TECHNICAL DRAWING";
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        /* CODE BLOCKS */
+        .code-window {
+            background-color: var(--code-bg);
+            border: 1px solid #333;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background-color: #1a1a1a;
+            padding: 10px 15px;
+            font-family: sans-serif;
+            font-size: 0.8rem;
+            color: #888;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        pre {
+            padding: 20px;
+            overflow-x: auto;
+            color: #ccc;
+        }
+
+        code { font-family: 'JetBrains Mono', monospace; }
+
+        .c-kw { color: #ff79c6; } /* Keyword */
+        .c-fn { color: #8be9fd; } /* Function */
+        .c-str { color: #f1fa8c; } /* String */
+        .c-com { color: #6272a4; font-style: italic; } /* Comment */
+
+        /* SPEC TABLE */
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .spec-table th, .spec-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        .spec-table th {
+            background-color: var(--blueprint-dim);
+            color: var(--blueprint-cyan);
+        }
+
+        /* FOOTER */
+        footer {
+            margin-top: 80px;
+            border-top: 2px solid var(--blueprint-cyan);
+            padding: 40px;
+            text-align: center;
+            color: var(--blueprint-dim);
+            font-family: 'Teko', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>05. PROJECT: DIGISPARK</h1>
+            <div class="specs">
+                <span>DEVICE: ATtiny85</span>
+                <span>COST: ~$2.00</span>
+                <span>STORAGE: 6KB (Usable)</span>
+                <span>INTERFACE: USB 2.0 (Software)</span>
+            </div>
+            <span class="screw-bl"></span><span class="screw-br"></span>
+        </header>
+
+        <section id="chapter-14">
+            <h2><span class="num">14</span> Meet the ATtiny85 (The Brain)</h2>
+            
+            <div class="content-block">
+                <div class="en-text">
+                    <p>The <strong>Digispark</strong> is an Arduino-compatible development board based on the <strong>ATtiny85</strong> microcontroller. Unlike a standard Arduino (ATmega328P), the ATtiny85 is incredibly small and cheap. It doesn't have a dedicated USB chip. Instead, it uses a clever firmware trick called <strong>"Micronucleus"</strong> to emulate USB signals using software (Bit-banging).</p>
+                    <p>This capability allows it to act as a <strong>Human Interface Device (HID)</strong>—specifically, a keyboard. This is exactly what we need for a BadUSB attack.</p>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>14. Digispark හඳුනාගැනීම (පුංචි මොළකරු)</strong><br>
+                    Digispark කියන්නේ <strong>ATtiny85</strong> කියන මයික්‍රොකන්ට්‍රෝලර් එකෙන් දුවන හරිම පුංචි බෝඩ් එකක්. සාමාන්‍ය Arduino එකක USB පාලනය කරන්න වෙනම චිප් එකක් තිබුණට, මේකේ එහෙම නෑ. මේකේ තියෙන්නේ සොෆ්ට්වෙයාර් මගින් USB සිග්නල් හදන තාක්ෂණයක් (Bit-banging).<br><br>
+                    අපිට වැදගත්ම දේ තමයි, මේ පොඩි බෝඩ් එකට පුළුවන් කම්පියුටර් එකට බොරු කරලා "මම කීබෝඩ් එකක්" කියලා හඳුන්වා දෙන්න. රුපියල් 500-600 කට ගන්න පුළුවන් මේ ගැජට් එකෙන් රුපියල් 20,000ක Rubber Ducky එකක වැඩ ගන්න පුළුවන්.</p>
+                </div>
+
+                <table class="spec-table">
+                    <tr>
+                        <th>Feature</th>
+                        <th>Digispark (Clone)</th>
+                        <th>USB Rubber Ducky (Pro)</th>
+                    </tr>
+                    <tr>
+                        <td>Processor</td>
+                        <td>ATtiny85 (8-bit)</td>
+                        <td>AT32UC3B (32-bit)</td>
+                    </tr>
+                    <tr>
+                        <td>Memory (Flash)</td>
+                        <td>~6 KB (Very Small)</td>
+                        <td>SD Card Support (Huge)</td>
+                    </tr>
+                    <tr>
+                        <td>Scripting</td>
+                        <td>Arduino C++</td>
+                        <td>Ducky Script (Simple)</td>
+                    </tr>
+                    <tr>
+                        <td>Price</td>
+                        <td>~$2.00 (Cheap)</td>
+                        <td>~$50.00 (Expensive)</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <section id="chapter-15">
+            <h2><span class="num">15</span> The "Micronucleus" Driver Setup</h2>
+            
+            <div class="content-block">
+                <div class="en-text">
+                    <p>Before you plug the device in, you MUST install the drivers. Since Digispark uses a non-standard USB implementation, Windows won't recognize it automatically. We need the <strong>Micronucleus Driver</strong>.</p>
+                    <p><strong>Installation Steps:</strong><br>
+                    1. Download the Digispark Drivers (Zadig or Official Micronucleus).<br>
+                    2. Install the drivers BEFORE plugging the device.<br>
+                    3. If using Zadig, select `libusb-win32` driver for the unknown device.</p>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>15. ඩ්‍රයිවර්ස් ඉන්ස්ටෝල් කිරීම (Micronucleus)</strong><br>
+                    වැදගත්ම දේ: <strong>බෝඩ් එක ප්ලග් කරන්න එපා!</strong> ඊට කලින් ඩ්‍රයිවර්ස් දාන්න ඕනේ. Digispark එකේ USB සිස්ටම් එක ටිකක් අමුතු නිසා වින්ඩෝස් එකට නිකන්ම මේක අඳුරගන්න බෑ.<br><br>
+                    <strong>පියවර:</strong><br>
+                    1. ඉන්ටර්නෙට් එකෙන් `Digispark Drivers` ඩවුන්ලෝඩ් කරන්න.<br>
+                    2. `DPinst64.exe` (64-bit නම්) රන් කරන්න.<br>
+                    3. ඩ්‍රයිවර්ස් ඉන්ස්ටෝල් වුණාට පස්සේ තමයි අපි Arduino IDE එක හදන්නේ.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-16">
+            <h2><span class="num">16</span> Configuring the Factory (Arduino IDE)</h2>
+            
+            <div class="content-block">
+                <div class="en-text">
+                    <p>The Digispark is programmed using the standard Arduino IDE, but we need to add the board manager URL first.</p>
+                    <p><strong>Step-by-Step Configuration:</strong><br>
+                    1. Open Arduino IDE > <strong>File</strong> > <strong>Preferences</strong>.<br>
+                    2. In "Additional Boards Manager URLs", paste:<br> 
+                    <code style="color:var(--blueprint-cyan);">http://digistump.com/package_digistump_index.json</code><br>
+                    3. Go to <strong>Tools</strong> > <strong>Board</strong> > <strong>Boards Manager</strong>.<br>
+                    4. Search for "Digistump AVR Boards" and install it.<br>
+                    5. Select Board: <strong>Digispark (Default - 16.5mhz)</strong>.</p>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>16. Arduino IDE සකසා ගැනීම</strong><br>
+                    අපි කෝඩ් ලියන්නේ Arduino සොෆ්ට්වෙයාර් එකේ. හැබැයි ඒකේ මුලින්ම Digispark බෝඩ් එක නෑ. ඒක එකතු කරගන්න ඕනේ.<br><br>
+                    1. Arduino IDE ඕපන් කරලා `File > Preferences` යන්න.<br>
+                    2. `Additional Boards Manager URLs` කියන තැනට Digistump URL එක දාන්න.<br>
+                    3. `Tools > Board > Boards Manager` ගිහින් "Digistump" කියලා සර්ච් කරලා ඉන්ස්ටෝල් කරන්න.<br>
+                    4. දැන් බෝඩ් ලිස්ට් එකෙන් `Digispark (Default - 16.5mhz)` තෝරන්න.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-17">
+            <h2><span class="num">17</span> Payload 01: The "Hello World" Attack</h2>
+            
+            <div class="content-block">
+                <div class="en-text">
+                    <p>Now for the exciting part. We will write a script that opens "Notepad" and types a message. This confirms that the Digispark is successfully acting as a keyboard.</p>
+                    <p><strong>Important:</strong> Digispark works differently than other Arduinos. You must click <strong>UPLOAD</strong> first, and plug the USB in <strong>ONLY when the console says "Plug in device now"</strong>.</p>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>17. පළමු ප්‍රහාරය: "Hello World"</strong><br>
+                    දැන් අපි පොඩි ස්ක්‍රිප්ට් එකක් ලියමු. මේකෙන් වෙන්නේ Digispark එක ගැහුවම, ඔටෝමැටික් "Notepad" ඕපන් වෙලා මැසේජ් එකක් ටයිප් වෙන එක. මේක සාර්ථක වුණොත්, අපේ BadUSB එක වැඩ!<br><br>
+                    <strong>විශේෂ අවවාදයයි:</strong> සාමාන්‍ය Arduino වගේ නෙවෙයි, මේකෙදි මුලින්ම කොම්පියුටර් එකට ගහලා තියන්න එපා. මුලින්ම කෝඩ් එක ලියලා `Upload` බට්න් එක ඔබන්න. ඊට පස්සේ පල්ලෙහා කළු පාට තිරේ <em>"Plug in device now"</em> කියලා වැටුනම විතරක් Digispark එක ප්ලග් කරන්න.</p>
+                </div>
+
+                <div class="code-window">
+                    <div class="code-header">
+                        <span>FILE: Hello_World_Payload.ino</span>
+                        <span>LANG: C++ (Arduino)</span>
+                    </div>
+                    <pre>
+<span class="c-com">#include "DigiKeyboard.h"  // HID Library එක ඇතුළත් කිරීම</span>
+
+<span class="c-kw">void</span> <span class="c-fn">setup</span>() {
+  <span class="c-com">// ආරම්භයේදී යම් කාලයක් බලා සිටීම අනිවාර්යයි (Driver Load වීමට)</span>
+  <span class="c-fn">DigiKeyboard.delay</span>(2000); 
+
+  <span class="c-com">// 1. Run Dialog එක ඕපන් කිරීම (Windows Key + R)</span>
+  <span class="c-fn">DigiKeyboard.sendKeyStroke</span>(0, MOD_GUI_LEFT | KEY_R);
+  <span class="c-fn">DigiKeyboard.delay</span>(500);
+
+  <span class="c-com">// 2. 'notepad' ලෙස ටයිප් කිරීම</span>
+  <span class="c-fn">DigiKeyboard.print</span>(<span class="c-str">"notepad"</span>);
+  <span class="c-fn">DigiKeyboard.sendKeyStroke</span>(KEY_ENTER);
+  <span class="c-fn">DigiKeyboard.delay</span>(1000);
+
+  <span class="c-com">// 3. මැසේජ් එක ටයිප් කිරීම</span>
+  <span class="c-fn">DigiKeyboard.print</span>(<span class="c-str">"Hello! This is a BadUSB Attack using Digispark."</span>);
+  <span class="c-fn">DigiKeyboard.sendKeyStroke</span>(KEY_ENTER);
+  <span class="c-fn">DigiKeyboard.print</span>(<span class="c-str">"Your PC is now hacked... just kidding!"</span>);
+}
+
+<span class="c-kw">void</span> <span class="c-fn">loop</span>() {
+  <span class="c-com">// BadUSB එකකදී අපි Loop එකේ මුකුත් ලියන්නේ නෑ.</span>
+  <span class="c-com">// නැත්නම් මේක මැෂින් එක ඕෆ් කරනකම්ම දිගටම ටයිප් කරයි!</span>
+}</pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-18">
+            <h2><span class="num">18</span> Troubleshooting (When things break)</h2>
+            
+            <div class="content-block">
+                <div class="en-text">
+                    <p>Working with Digispark can be frustrating. Here are common errors and fixes:</p>
+                    <ul>
+                        <li><strong>Error: "Device not found"</strong> - Did you plug it in too early? Unplug, hit upload, wait for the prompt, then plug in.</li>
+                        <li><strong>Error: "Driver not recognized"</strong> - Try a different USB port or reinstall drivers using Zadig.</li>
+                        <li><strong>Typing is gibberish?</strong> - This happens if the computer's keyboard layout is not US English. Digispark assumes a US layout.</li>
+                    </ul>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>18. ගැටළු විසඳීම (Troubleshooting)</strong><br>
+                    Digispark එකත් එක්ක වැඩ කරද්දී පොඩි පොඩි ලෙඩ එනවා. මෙන්න විසඳුම්:<br>
+                    <ul>
+                        <li><strong>"Device not found" කියනවද?</strong> - ඔයා ඉක්මනට බෝඩ් එක ගැහුවා වැඩියි. ගලවන්න. අප්ලෝඩ් ඔබන්න. "Plug in now" කිව්වම විතරක් ගහන්න.</li>
+                        <li><strong>ඩ්‍රයිවර් අවුලක්ද?</strong> - USB 3.0 පෝර්ට් වල සමහර වෙලාවට වැඩ නෑ. USB 2.0 පෝර්ට් එකකට ගහලා බලන්න. නැත්නම් USB Hub එකක් හරහා ගහන්න.</li>
+                        <li><strong>කුණුහරුප ටයිප් වෙනවද?</strong> - ඔයාගේ කම්පියුටර් එකේ කීබෝඩ් භාෂාව (Layout) ඉංග්‍රීසි (US) නැත්නම් සමහර අකුරු මාරු වෙලා ටයිප් වෙන්න පුළුවන්.</li>
+                    </ul>
+                </p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>DEV-KUPPIYA RESEARCH LABS | PART 05 OF 10 COMPLETED</p>
+        <p>STATUS: HARDWARE READY. NEXT: ADVANCED SCRIPTS.</p>
+    </footer>
+
+</body>
+</html>
