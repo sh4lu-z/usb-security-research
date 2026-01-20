@@ -9,14 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <style>
-        /* ==================================================================================
-           PART 4: BIOHAZARD / LAB THEME (SAFETY YELLOW & INDUSTRIAL BLACK)
-           ==================================================================================
-           මෙම කොටසේදී අපි "Laboratory" පරිසරයක් නිර්මාණය කිරීමට කහ (Safety Yellow)
-           සහ කළු වර්ණ භාවිතා කරමු. මෙහි CSS ඉතා සංකීර්ණ ලෙස සකසා ඇත.
-           Line count එක වැඩි කිරීම සඳහා අපි සෑම කුඩා විස්තරයක්ම CSS වලින් පාලනය කරමු.
-        */
-
+        
         :root {
             --bg-color: #0d0d0d;       /* Deep Industrial Black */
             --text-primary: #cccccc;   /* Soft White */
@@ -32,10 +25,7 @@
             --scan-line: rgba(255, 204, 0, 0.1);
         }
 
-        /* GLOBAL RESET & TYPOGRAPHY
-           --------------------------------------------------
-           මූලික අකුරු සැකසුම් සහ පිටුවේ පෙනුම
-        */
+   
         * {
             box-sizing: border-box;
             margin: 0;
@@ -54,10 +44,6 @@
             background-size: 50px 50px; /* Grid Pattern */
         }
 
-        /* CONTAINER LAYOUT
-           --------------------------------------------------
-           ප්‍රධාන කොටුව මැදට ගැනීම
-        */
         .container {
             max-width: 1100px;
             margin: 0 auto;
@@ -65,10 +51,6 @@
             position: relative;
         }
 
-        /* HEADER SECTION - THE "CAUTION TAPE" LOOK
-           --------------------------------------------------
-           ඉහළ ශීර්ෂය කහ පාට පටි වලින් වටවූ අනතුරු ඇඟවීමක් ලෙස
-        */
         header {
             border: 4px solid var(--safety-yellow);
             padding: 40px;
@@ -116,10 +98,7 @@
             padding-left: 15px;
         }
 
-        /* CONTENT SECTIONS (LAB PROTOCOLS)
-           --------------------------------------------------
-           එක් එක් පාඩම් කොටස්
-        */
+ 
         section {
             background-color: rgba(15, 15, 15, 0.9);
             border: 1px solid var(--panel-border);
@@ -160,9 +139,6 @@
             font-size: 1.8rem;
         }
 
-        /* TEXT BLOCKS (SINHALA & ENGLISH)
-           --------------------------------------------------
-        */
         .content-block {
             display: grid;
             grid-template-columns: 1fr;
@@ -188,11 +164,7 @@
             line-height: 1.9;
         }
 
-        /* DIAGRAMS & SCHEMATICS (CSS DRAWINGS)
-           --------------------------------------------------
-           අපි පින්තූර වෙනුවට CSS වලින්ම Diagram අඳිමු.
-           එතකොට කෝඩ් එක දිග වැඩි වෙනවා වගේම ලස්සනයි.
-        */
+     
         .schematic-box {
             background-color: #001a00; /* Blueprint Green tint */
             border: 2px solid #004d00;
@@ -214,9 +186,6 @@
             opacity: 0.7;
         }
 
-        /* TERMINAL LOGS (FOR VM EXPLANATION)
-           --------------------------------------------------
-        */
         .terminal {
             background-color: #000;
             border: 1px solid #333;
