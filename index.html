@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USB Security Research Labs | Sh4lu_z</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Orbitron:wght@900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ffcc;
+            --bg: #050a10;
+            --card-bg: #0f1a24;
+            --text: #e0f7fa;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Rajdhani', sans-serif;
+            margin: 0; padding: 0;
+            background-image: linear-gradient(0deg, rgba(0, 255, 204, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 204, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 50px 20px; }
+        
+        header { text-align: center; margin-bottom: 60px; border-bottom: 2px solid var(--primary); padding-bottom: 30px; }
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; color: var(--primary); text-transform: uppercase; margin: 0; text-shadow: 0 0 20px rgba(0,255,204,0.4); }
+        p.subtitle { font-size: 1.2rem; letter-spacing: 3px; color: #88ccff; margin-top: 10px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        
+        .card {
+            background: var(--card-bg);
+            border: 1px solid #334455;
+            padding: 30px;
+            border-radius: 10px;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .card::before { content: ""; position: absolute; top: 0; left: 0; width: 5px; height: 100%; background: var(--primary); opacity: 0.5; }
+        
+        .part-num { font-size: 3rem; font-weight: bold; color: rgba(255,255,255,0.1); position: absolute; top: 10px; right: 20px; }
+        .card-title { font-size: 1.5rem; font-weight: bold; color: var(--primary); margin-bottom: 10px; display: block; }
+        .card-desc { font-size: 1rem; color: #aaccff; }
+
+        footer { text-align: center; margin-top: 80px; color: #557799; border-top: 1px solid #223344; padding-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>USB SECURITY<br>RESEARCH LABS</h1>
+            <p class="subtitle">PROJECT LEAD: SH4LU_Z</p>
+        </header>
+
+        <div class="grid">
+            <a href="part1.html" class="card">
+                <span class="part-num">01</span>
+                <span class="card-title">The Foundation</span>
+                <span class="card-desc">Understanding HID attacks and why computers trust USB devices blindly.</span>
+            </a>
+            <a href="part2.html" class="card">
+                <span class="part-num">02</span>
+                <span class="card-title">Hardware Architecture</span>
+                <span class="card-desc">Deep dive into Microcontrollers, ATtiny85, and spoofing VID/PID.</span>
+            </a>
+            <a href="part3.html" class="card">
+                <span class="part-num">03</span>
+                <span class="card-title">High Voltage Physics</span>
+                <span class="card-desc">How USB Killers work: 200V surges and circuit destruction analysis.</span>
+            </a>
+            <a href="part4.html" class="card">
+                <span class="part-num">04</span>
+                <span class="card-title">The Safe Lab</span>
+                <span class="card-desc">Setting up Virtual Machines, Isolation, and "Sacrificial Lambs".</span>
+            </a>
+            <a href="part5.html" class="card">
+                <span class="part-num">05</span>
+                <span class="card-title">Digispark Engineering</span>
+                <span class="card-desc">Building your first BadUSB for $2. Driver setup and "Hello World".</span>
+            </a>
+            <a href="part6.html" class="card">
+                <span class="part-num">06</span>
+                <span class="card-title">Data Exfiltration</span>
+                <span class="card-desc">Stealing WiFi passwords using PowerShell and Webhooks.</span>
+            </a>
+            <a href="part7.html" class="card">
+                <span class="part-num">07</span>
+                <span class="card-title">Ghost Protocol</span>
+                <span class="card-desc">Bypassing Windows Defender using Obfuscation and Base64 encoding.</span>
+            </a>
+            <a href="part8.html" class="card">
+                <span class="part-num">08</span>
+                <span class="card-title">Pranks & Automation</span>
+                <span class="card-desc">Fake updates, Mouse Jigglers, and rapid software installation scripts.</span>
+            </a>
+            <a href="part9.html" class="card">
+                <span class="part-num">09</span>
+                <span class="card-title">Android Weaponry</span>
+                <span class="card-desc">Turning rooted phones into BadUSB devices using Kali Nethunter.</span>
+            </a>
+            <a href="part10.html" class="card" style="border-color: #ffd700;">
+                <span class="part-num">10</span>
+                <span class="card-title" style="color: #ffd700;">Final Defense & Cert</span>
+                <span class="card-desc">Prevention strategies, Legal ethics, and the Final Seal by Sh4lu_z.</span>
+            </a>
+        </div>
+
+        <footer>
+            <p>&copy; 2026 USB SECURITY RESEARCH LABS | VERIFIED BY SH4LU_Z</p>
+        </footer>
+    </div>
+</body>
+</html>
