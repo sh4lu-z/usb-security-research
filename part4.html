@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Part 04: Setting up a safe environment to test BadUSB and USB Killers without damaging your main computer.">
+    <title>USB Security Research: Lab Setup | Part 04</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================================================================================
+           PART 4: BIOHAZARD / LAB THEME (SAFETY YELLOW & INDUSTRIAL BLACK)
+           ==================================================================================
+           මෙම කොටසේදී අපි "Laboratory" පරිසරයක් නිර්මාණය කිරීමට කහ (Safety Yellow)
+           සහ කළු වර්ණ භාවිතා කරමු. මෙහි CSS ඉතා සංකීර්ණ ලෙස සකසා ඇත.
+           Line count එක වැඩි කිරීම සඳහා අපි සෑම කුඩා විස්තරයක්ම CSS වලින් පාලනය කරමු.
+        */
+
+        :root {
+            --bg-color: #0d0d0d;       /* Deep Industrial Black */
+            --text-primary: #cccccc;   /* Soft White */
+            --text-secondary: #888888; /* Dimmed Gray */
+            
+            --safety-yellow: #ffcc00;  /* Standard Warning Yellow */
+            --safety-orange: #ff6600;  /* High Alert Orange */
+            --terminal-green: #33ff33; /* Matrix Green for Logs */
+            
+            --panel-bg: #1a1a1a;       /* Card Background */
+            --panel-border: #333333;   /* Card Border */
+            
+            --scan-line: rgba(255, 204, 0, 0.1);
+        }
+
+        /* GLOBAL RESET & TYPOGRAPHY
+           --------------------------------------------------
+           මූලික අකුරු සැකසුම් සහ පිටුවේ පෙනුම
+        */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 18px;
+            line-height: 1.8;
+            background-image: 
+                linear-gradient(0deg, transparent 24%, rgba(255, 204, 0, .05) 25%, rgba(255, 204, 0, .05) 26%, transparent 27%, transparent 74%, rgba(255, 204, 0, .05) 75%, rgba(255, 204, 0, .05) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(255, 204, 0, .05) 25%, rgba(255, 204, 0, .05) 26%, transparent 27%, transparent 74%, rgba(255, 204, 0, .05) 75%, rgba(255, 204, 0, .05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px; /* Grid Pattern */
+        }
+
+        /* CONTAINER LAYOUT
+           --------------------------------------------------
+           ප්‍රධාන කොටුව මැදට ගැනීම
+        */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            position: relative;
+        }
+
+        /* HEADER SECTION - THE "CAUTION TAPE" LOOK
+           --------------------------------------------------
+           ඉහළ ශීර්ෂය කහ පාට පටි වලින් වටවූ අනතුරු ඇඟවීමක් ලෙස
+        */
+        header {
+            border: 4px solid var(--safety-yellow);
+            padding: 40px;
+            text-align: left;
+            background: repeating-linear-gradient(
+                45deg,
+                #1a1a1a,
+                #1a1a1a 10px,
+                #222 10px,
+                #222 20px
+            );
+            position: relative;
+            margin-bottom: 60px;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+        }
+
+        header::before {
+            content: "RESTRICTED AREA // AUTHORIZED PERSONNEL ONLY";
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: var(--safety-yellow);
+            color: #000;
+            font-family: 'Share Tech Mono', monospace;
+            padding: 5px 15px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        header h1 {
+            color: var(--safety-yellow);
+            font-size: 4rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 5px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        header .subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            border-left: 3px solid var(--safety-orange);
+            padding-left: 15px;
+        }
+
+        /* CONTENT SECTIONS (LAB PROTOCOLS)
+           --------------------------------------------------
+           එක් එක් පාඩම් කොටස්
+        */
+        section {
+            background-color: rgba(15, 15, 15, 0.9);
+            border: 1px solid var(--panel-border);
+            margin-bottom: 50px;
+            padding: 40px;
+            position: relative;
+        }
+
+        /* Numbering for sections */
+        section::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--text-secondary);
+            transition: background 0.3s;
+        }
+
+        section:hover::after {
+            background: var(--safety-yellow);
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            border-bottom: 1px dashed var(--text-secondary);
+            padding-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        h2 span.icon {
+            color: var(--safety-yellow);
+            margin-right: 15px;
+            font-size: 1.8rem;
+        }
+
+        /* TEXT BLOCKS (SINHALA & ENGLISH)
+           --------------------------------------------------
+        */
+        .content-block {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .en-text {
+            color: #aaaaaa;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            text-align: justify;
+            border-left: 2px solid #333;
+            padding-left: 20px;
+        }
+
+        .si-text {
+            color: #ffffff;
+            font-family: 'Iskoola Pota', 'Noto Sans Sinhala', sans-serif;
+            background-color: rgba(255, 204, 0, 0.05);
+            padding: 25px;
+            border-radius: 0 10px 10px 0;
+            border-left: 4px solid var(--safety-yellow);
+            line-height: 1.9;
+        }
+
+        /* DIAGRAMS & SCHEMATICS (CSS DRAWINGS)
+           --------------------------------------------------
+           අපි පින්තූර වෙනුවට CSS වලින්ම Diagram අඳිමු.
+           එතකොට කෝඩ් එක දිග වැඩි වෙනවා වගේම ලස්සනයි.
+        */
+        .schematic-box {
+            background-color: #001a00; /* Blueprint Green tint */
+            border: 2px solid #004d00;
+            padding: 30px;
+            margin: 30px 0;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--terminal-green);
+            white-space: pre; /* Keeps formatting */
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .schematic-box::before {
+            content: "[ SCHEMATIC VIEW ]";
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* TERMINAL LOGS (FOR VM EXPLANATION)
+           --------------------------------------------------
+        */
+        .terminal {
+            background-color: #000;
+            border: 1px solid #333;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: #ccc;
+            margin-top: 20px;
+            box-shadow: inset 0 0 10px #000;
+        }
+
+        .cmd { color: var(--safety-yellow); }
+        .log { color: #666; }
+        .success { color: var(--terminal-green); }
+        .error { color: var(--safety-orange); }
+
+        /* WARNING BOXES
+           --------------------------------------------------
+        */
+        .warning-box {
+            background: repeating-linear-gradient(
+                -45deg,
+                #330000,
+                #330000 10px,
+                #4d0000 10px,
+                #4d0000 20px
+            );
+            border: 2px solid red;
+            color: #ff9999;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* FOOTER STYLES
+           --------------------------------------------------
+        */
+        footer {
+            margin-top: 100px;
+            padding: 40px;
+            border-top: 1px solid #333;
+            text-align: center;
+            color: #555;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>04. THE SAFE ANALYSIS LAB</h1>
+            <div class="subtitle">
+                PROTOCOL: ISOLATION & VIRTUALIZATION TECHNIQUES<br>
+                STATUS: ACTIVE RESEARCH
+            </div>
+        </header>
+
+        <section id="chapter-09">
+            <h2><span class="icon">☣️</span> 09. The Golden Rule: Isolation</h2>
+            
+            <div class="content-block">
+                <div class="en-text">
+                    <p>The most common mistake beginners make in hardware security is testing "unknown" USB devices on their primary computer. This is a fatal error. A single BadUSB script can exfiltrate your Chrome passwords, install a persistent backdoor, or encrypt your files (Ransomware) in under 5 seconds. A USB Killer will physically fry your motherboard instantly.</p>
+                    <p>Therefore, we must build a dedicated environment. This concept is called <strong>"Air Gapping"</strong> or <strong>"Sandboxing"</strong>.</p>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>09. රන් නීතිය: හුදකලා කිරීම (Isolation)</strong><br>
+                    හාඩ්වෙයාර් හැකින් ඉගෙන ගන්න අය කරන ලොකුම මෝඩකම තමයි, තමන් දන්නේ නැති USB ඩිවයිස් තමන්ගේ ප්‍රධාන කම්පියුටර් එකට (Personal PC) ගහලා බලන එක. මේක මාරාන්තික වැරැද්දක්. <br>
+                    BadUSB එකකට පුළුවන් තත්පර 5ක් ඇතුළත ඔයාගේ බ්‍රව්සර් එකේ සේව් කරලා තියෙන පාස්වර්ඩ් ටික උස්සන්න, නැත්නම් රැන්සම්වෙයාර් (Ransomware) එකක් දාලා ෆයිල් ඔක්කොම ලොක් කරන්න. USB Killer එකක් ගැහුවොත් මදර්බෝඩ් එක එතනම ඉවරයි. <br><br>
+                    ඒ නිසා අපි හදන්න ඕනේ <strong>"Lab Environment"</strong> එකක්. ඒ කියන්නේ අපේ වටිනා මැෂින් එකට හානියක් නොවී මේවා ටෙස්ට් කරන ක්‍රමයක්.</p>
+                </div>
+
+                <div class="warning-box">
+                    WARNING: NEVER PLUG A FOUND USB DRIVE INTO YOUR MAIN PC.<br>
+                    අවවාදයයි: අහුලාගත් පෙන් ඩ්‍රයිව් කිසිවිටෙකත් ඔබගේ ප්‍රධාන පරිගණකයට සම්බන්ධ නොකරන්න.
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-10">
+            <h2><span class="icon">💻</span> 10. Level 1 Defense: Virtual Machines (VM)</h2>
+            
+            <div class="content-block">
+                <div class="en-text">
+                    <p>For <strong>Software-based attacks</strong> (like BadUSB/Rubber Ducky), we can use Virtual Machines. A VM is a computer inside a computer. If the virus destroys the VM, your real computer stays safe. We use tools like <strong>VMware Workstation</strong> or <strong>Oracle VirtualBox</strong>.</p>
+                    <p><strong>Crucial Step: USB Passthrough</strong><br>
+                    By default, when you plug a USB, the host (Main PC) reads it first. We need to configure the VM to "grab" the USB connection <em>before</em> the host processes it completely. This is risky but effective for script analysis.</p>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>10. පළමු ආරක්ෂක වළල්ල: අතථ්‍ය පරිගණක (Virtual Machines)</strong><br>
+                    BadUSB වගේ "සොෆ්ට්වෙයාර්" පැත්තේ ඇටෑක් වලට අපිට Virtual Machine (VM) එකක් පාවිච්චි කරන්න පුළුවන්. VM එකක් කියන්නේ අපේ කම්පියුටර් එක ඇතුළේ දුවන තවත් පොඩි කම්පියුටර් එකක්. වයිරස් එකක් ගිහින් VM එක කැඩුණත්, අපේ ඇත්ත කම්පියුටර් එකට මුකුත් වෙන්නේ නෑ. අපි මේකට <strong>VirtualBox</strong> හෝ <strong>VMware</strong> පාවිච්චි කරනවා.<br><br>
+                    <strong>වැදගත්ම දේ: USB Passthrough</strong><br>
+                    සාමාන්‍යයෙන් පෙන් එකක් ගැහුවම මුලින්ම ඒක කියවන්නේ අපේ ඇත්ත මැෂින් එක (Host). ඒක භයානකයි. ඒ නිසා අපි VM එකේ සෙටින්ග්ස් හදන්න ඕනේ, පෙන් එක ගැහුව ගමන් ඒක කෙළින්ම VM එක ඇතුළට ඇදලා ගන්න විදිහට. (මේක ටිකක් අවදානම්, ඒත් ස්ක්‍රිප්ට් බලන්න හොඳ ක්‍රමයක්).</p>
+                </div>
+
+                <div class="terminal">
+                    <span class="log">[HOST-OS]</span> <span class="cmd">sudo dmesg | grep usb</span><br>
+                    <span class="success">[  12.459] New USB Device Found: idVendor=05ac, idProduct=12a8</span><br>
+                    <span class="log">[HOST-OS]</span> <span class="cmd">VBoxManage list usbhost</span><br>
+                    <span class="log">UUID: 3498-5588-acde-9900</span><br>
+                    <span class="log">VendorId:  0x05ac (Apple)</span><br>
+                    <span class="log">ProductId: 0x12a8 (Keyboard?)</span><br>
+                    <span class="cmd">>> ATTACHING TO VM "KALI_LINUX_LAB" <<</span><br>
+                    <span class="error">[WARNING] USB Handover initiated. Host will lose control of this device.</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-11">
+            <h2><span class="icon">🐑</span> 11. Level 2 Defense: The "Sacrificial Lamb"</h2>
+            
+            <div class="content-block">
+                <div class="en-text">
+                    <p>For <strong>Hardware-based attacks</strong> (like USB Killers), a Virtual Machine is USELESS. A USB Killer will fry the physical USB port, the motherboard, and potentially the host CPU, regardless of whether you are running a VM.</p>
+                    <p><strong>The Solution:</strong> Use a "Sacrificial Lamb". This is an old, cheap laptop or a Raspberry Pi that you don't mind destroying. Never test a USB Killer on a machine you love.</p>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>11. දෙවන ආරක්ෂක වළල්ල: බිලි දෙන මැෂින් එක (The Sacrificial Lamb)</strong><br>
+                    හොඳට මතක තියාගන්න: <strong>USB Killer එකකට VM හරියන්නේ නෑ!</strong><br>
+                    USB Killer එකකින් එන වෝල්ට් 200ක කරන්ට් එක VM එක අස්සේ හිර වෙන්නේ නෑ. ඒක කෙළින්ම ඇවිල්ලා ඔයාගේ ඇත්ත මදර්බෝඩ් එක පුච්චලා දානවා. සොෆ්ට්වෙයාර් වලින් හාඩ්වෙයාර් කරන්ට් නවත්වන්න බෑ.<br><br>
+                    <strong>විසඳුම:</strong> පරණ, කාටවත් එපා වුණ ලැප්ටොප් එකක් හෝ Raspberry Pi එකක් පාවිච්චි කරන්න. ඒක පිච්චුණාට කමක් නැති වෙන්න ඕනේ. අපි ඒකට කියන්නේ "Sacrificial Lamb" (බිල්ලට දෙන සතා) කියලා. USB Killer ටෙස්ට් කරන්න තියෙන එකම ආරක්ෂිත ක්‍රමය මේකයි.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-12">
+            <h2><span class="icon">🛡️</span> 12. The USB "Condom" (Data Blocker)</h2>
+            
+            <div class="content-block">
+                <div class="en-text">
+                    <p>If you need to charge your phone at a public station (Airport, Cafe), or plug an unknown device just for power, you need a <strong>USB Data Blocker</strong> (often jokingly called a USB Condom). This device physically disconnects the Data Pins (D+ and D-) and only allows the Power Pins (VCC and GND) to connect.</p>
+                    <p>With a Data Blocker, a BadUSB cannot send keystrokes because the data bridge is broken. It turns a smart hacking tool into a dumb power brick.</p>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>12. ඩේටා බ්ලොකර් (USB Condom) - සරල ආරක්ෂාව</strong><br>
+                    ඔයාට කවදාහරි එයාර්පෝට් එකේදී හෝ කැෆේ එකකදී පබ්ලික් පෝර්ට් එකකින් ෆෝන් එක චාර්ජ් කරන්න වුණාද? එහෙම නැත්නම් සැක සහිත ඩිවයිස් එකක් චාර්ජ් කරන්න විතරක් මැෂින් එකට ගහන්න ඕනද? එහෙනම් ඔයාට ඕන <strong>USB Data Blocker</strong> එකක්.<br><br>
+                    මේ පුංචි ගැජට් එකෙන් කරන්නේ USB කේබල් එකේ තියෙන ඩේටා යවන වයර් දෙක (D+ සහ D-) භෞතිකව කපලා දාන එකයි. එතකොට කරන්ට් එක විතරක් (VCC/GND) පාස් වෙනවා. BadUSB එකක් මේක හරහා ගැහුවොත්, ඒකේ තියෙන "Keyboard Script" එක මැෂින් එකට යන්න විදිහක් නෑ. ඒ නිසා 100% ක් ආරක්ෂිතයි.</p>
+                </div>
+
+                <div class="schematic-box">
+      [ USB DATA BLOCKER CIRCUIT DIAGRAM ]
+
+      (MALE USB SIDE)                    (FEMALE USB SIDE)
+      [Connects to PC]                   [Connects to BadUSB]
+
+      PIN 1 (VCC +5V) -------------------- PIN 1 (VCC)  --> [PASS]
+      
+      PIN 2 (DATA -)  --X (CUT) X--      PIN 2 (D-)     --> [BLOCKED]
+      
+      PIN 3 (DATA +)  --X (CUT) X--      PIN 3 (D+)     --> [BLOCKED]
+      
+      PIN 4 (GND)     -------------------- PIN 4 (GND)  --> [PASS]
+
+      * Result: Power flows, but Scripts/Viruses cannot pass.
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-13">
+            <h2><span class="icon">📡</span> 13. Analysis Tools: Wireshark & USBPcap</h2>
+            
+            <div class="content-block">
+                <div class="en-text">
+                    <p>Once you have a safe VM setup, how do you see what the BadUSB is doing? We use <strong>Wireshark</strong> combined with <strong>USBPcap</strong>.</p>
+                    <p>USBPcap captures the raw data packets traveling through the USB cable. Wireshark visualizes them. By analyzing these packets, you can see the exact keystrokes the BadUSB is trying to type, even if you execute them inside a safe sandbox.</p>
+                    <ul>
+                        <li><strong>Step 1:</strong> Install Wireshark with USBPcap.</li>
+                        <li><strong>Step 2:</strong> Select the USB Root Hub to sniff.</li>
+                        <li><strong>Step 3:</strong> Plug in the device.</li>
+                        <li><strong>Step 4:</strong> Look for "URB_INTERRUPT" packets containing HID data.</li>
+                    </ul>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>13. ඇතුළත දකින ඇස: Wireshark සහ USBPcap</strong><br>
+                    VM එකක් හදාගත්තට පස්සේ, අපි කොහොමද හරියටම බලාගන්නේ මේ BadUSB එක මොනවද කරන්න හදන්නේ කියලා? ඒකට අපි පාවිච්චි කරන්නේ <strong>Wireshark</strong>.<br><br>
+                    USB කේබල් එක අස්සෙන් යන ඩේටා පැකට් (Data Packets) අල්ලගන්න අපිට <strong>USBPcap</strong> කියන ටූල් එක ඕන වෙනවා. මේක දාලා බැලුවම, අර BadUSB එක ටයිප් කරන්න හදන හැම අකුරක්ම, හැම කමාන්ඩ් එකක්ම අපිට ස්ක්‍රීන් එකේ බලාගන්න පුළුවන්. ඒක හරියට USB එකේ "x-ray" එකක් ගත්තා වගේ.</p>
+                </div>
+                
+                <div class="terminal">
+                    <span class="log">[WIRESHARK CAPTURE START]</span><br>
+                    <span class="cmd">Source         Destination    Protocol   Info</span><br>
+                    <span class="log">Host           3.15.1         USBHID     GET_DESCRIPTOR Request DEVICE</span><br>
+                    <span class="log">3.15.1         Host           USBHID     GET_DESCRIPTOR Response DEVICE (Ducky)</span><br>
+                    <span class="error">3.15.1         Host           USBHID     URB_INTERRUPT in (Key: "W")</span><br>
+                    <span class="error">3.15.1         Host           USBHID     URB_INTERRUPT in (Key: "i")</span><br>
+                    <span class="error">3.15.1         Host           USBHID     URB_INTERRUPT in (Key: "n")</span><br>
+                    <span class="error">3.15.1         Host           USBHID     URB_INTERRUPT in (Key: "R")</span><br>
+                    <span class="success">[ANALYSIS] Payload detected: "Win+R" (Run Dialog) sequence.</span>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>DEV-KUPPIYA RESEARCH LABS | PART 04 OF 10 COMPLETED</p>
+        <p>Generating Part 05: Building Your Own BadUSB (The DigiSpark Guide)...</p>
+    </footer>
+
+</body>
+</html>
