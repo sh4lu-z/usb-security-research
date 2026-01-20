@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Part 08: Using BadUSB for harmless pranks, office automation, and mouse jigglers. Learning the fun side of HID attacks.">
+    <title>USB Security Research: Pranks & Automation | Part 08</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==================================================================================
+           PART 8: THEME - RETRO ARCADE GLITCH (NEON PINK & CYAN)
+           ==================================================================================
+           මෙම කොටසේ තේමාව "Retro Gaming" සහ "Glitch Art" වේ.
+           අපි Neon Pink, Cyan සහ Pixel Fonts භාවිතා කරමින් විනෝදාත්මක 
+           නමුත් තාක්ෂණික පෙනුමක් ලබා දෙමු.
+        */
+
+        :root {
+            --bg-color: #1a001a;       /* Deep Purple Black */
+            --neon-pink: #ff00ff;      /* Hot Pink */
+            --neon-cyan: #00ffff;      /* Cyber Cyan */
+            --neon-yellow: #ffff00;    /* Arcade Yellow */
+            
+            --text-main: #e0e0e0;
+            --panel-bg: #2b002b;
+            --border-color: #660066;
+            
+            --crt-scanline: rgba(18, 16, 16, 0.1);
+        }
+
+        /* GLOBAL RESET */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'VT323', monospace; /* Retro Terminal Font */
+            font-size: 20px;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* CRT MONITOR SCANLINE EFFECT */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        /* HEADER: ARCADE STYLE */
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+            border: 4px solid var(--neon-pink);
+            padding: 40px;
+            background-color: #000;
+            box-shadow: 5px 5px 0px var(--neon-cyan);
+            position: relative;
+        }
+
+        header h1 {
+            font-family: 'Press Start 2P', cursive; /* Pixel Font */
+            font-size: 2.5rem;
+            color: var(--neon-yellow);
+            text-shadow: 4px 4px var(--neon-pink);
+            line-height: 1.5;
+            margin-bottom: 20px;
+            animation: text-flicker 3s infinite;
+        }
+
+        header .subtitle {
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+        }
+
+        /* SECTIONS: GAME LEVELS */
+        section {
+            background-color: var(--panel-bg);
+            border: 2px solid var(--neon-pink);
+            margin-bottom: 60px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
+        }
+
+        /* Pixel Corners */
+        section::before {
+            content: "";
+            position: absolute;
+            top: -6px; left: -6px;
+            width: 10px; height: 10px;
+            background: var(--neon-cyan);
+        }
+        section::after {
+            content: "";
+            position: absolute;
+            bottom: -6px; right: -6px;
+            width: 10px; height: 10px;
+            background: var(--neon-cyan);
+        }
+
+        h2 {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.2rem;
+            color: var(--neon-cyan);
+            margin-bottom: 30px;
+            border-bottom: 2px dashed var(--neon-pink);
+            padding-bottom: 15px;
+            line-height: 1.8;
+        }
+
+        h2 .level {
+            background: var(--neon-pink);
+            color: #000;
+            padding: 5px 10px;
+            margin-right: 15px;
+            font-size: 0.8rem;
+        }
+
+        /* CONTENT GRIDS */
+        .content-block {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .en-text {
+            color: #d1d1d1;
+            font-size: 1.2rem;
+            text-align: justify;
+        }
+
+        .si-text {
+            color: #fff;
+            font-family: 'Iskoola Pota', sans-serif;
+            background: rgba(255, 0, 255, 0.1);
+            padding: 20px;
+            border-left: 5px solid var(--neon-cyan);
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        /* CODE BLOCKS: RETRO TERMINAL */
+        .retro-code {
+            background-color: #000;
+            border: 2px solid var(--neon-yellow);
+            padding: 20px;
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem;
+            color: var(--neon-cyan);
+            overflow-x: auto;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .retro-code::before {
+            content: "INSERT COIN TO COPY";
+            position: absolute;
+            top: 0; right: 0;
+            background: var(--neon-yellow);
+            color: #000;
+            font-size: 0.8rem;
+            padding: 2px 5px;
+            font-family: sans-serif;
+        }
+
+        .c-com { color: #888; } /* Comment */
+        .c-func { color: var(--neon-pink); } /* Function */
+        .c-str { color: var(--neon-yellow); } /* String */
+
+        /* PRANK CARDS */
+        .prank-card {
+            border: 1px solid #444;
+            padding: 15px;
+            background: #111;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .prank-icon {
+            font-size: 3rem;
+            filter: drop-shadow(0 0 5px var(--neon-pink));
+        }
+
+        /* ANIMATIONS */
+        @keyframes text-flicker {
+            0% { opacity: 1; }
+            5% { opacity: 0.8; }
+            10% { opacity: 1; }
+            50% { text-shadow: 4px 4px var(--neon-pink); }
+            52% { text-shadow: -2px -2px var(--neon-cyan); }
+            54% { text-shadow: 4px 4px var(--neon-pink); }
+            100% { opacity: 1; }
+        }
+
+        /* FOOTER */
+        footer {
+            margin-top: 80px;
+            text-align: center;
+            color: #666;
+            border-top: 4px double var(--neon-pink);
+            padding-top: 30px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <header>
+            <h1>PART 08<br>AUTOMATION & CHAOS</h1>
+            <div class="subtitle">
+                >> INSERT USB TO START <<
+            </div>
+        </header>
+
+        <section id="chapter-29">
+            <h2><span class="level">LVL 01</span> NOT JUST FOR VILLAINS</h2>
+            
+            <div class="content-block">
+                <div class="en-text">
+                    <p>So far, we've focused on "Black Hat" techniques (stealing passwords, destroying hardware). But BadUSB is essentially a <strong>keyboard automation tool</strong>. This means we can use it for good (Automation) or for fun (Pranks).</p>
+                    <p>In this section, we will write scripts that are <strong>harmless</strong> but incredibly annoying or useful. These are great for demonstrating the danger of USB drives to your friends without actually hurting them.</p>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>29. දුෂ්ට වැඩ විතරක් නෙවෙයි!</strong><br>
+                    අපි මෙච්චර කල් කතා කළේ දත්ත හොරකම් කරන හැටි සහ හාඩ්වෙයාර් පුච්චන හැටි (Black Hat) ගැනනේ. ඒත් මතක තියාගන්න, BadUSB කියන්නේ නිකන්ම "කීබෝඩ් ඔටෝමැේෂන්" ටූල් එකක්. ඒ කියන්නේ අපිට පුළුවන් මේක පාවිච්චි කරලා අපේ වැඩ ලේසි කරගන්න (Automation) හෝ යාළුවෙක්ව බය කරලා ආතල් එකක් ගන්න (Pranks).<br><br>
+                    මේ කොටසේදී අපි ලියන්නේ හානිකර නැති, හැබැයි පිස්සු හැදෙන ස්ක්‍රිප්ට්ස් ටිකක්. කාටවත් හානියක් නොවී USB ආරක්ෂාව ගැන කියලා දෙන්න මේවා මරු.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-30">
+            <h2><span class="level">LVL 02</span> THE FAKE UPDATE SCREEN</h2>
+            
+            <div class="content-block">
+                <div class="prank-card">
+                    <span class="prank-icon">🔄</span>
+                    <div>
+                        <strong>THE CONCEPT:</strong><br>
+                        Open a full-screen web page that looks exactly like a Windows Update screen. The progress bar moves slowly, and the user thinks their PC is stuck updating.
+                    </div>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>30. වින්ඩෝස් අප්ඩේට් ප්‍රෑන්ක් එක</strong><br>
+                    මේක තමයි ලෝකේ ප්‍රසිද්ධම IT Prank එක. අපි කරන්නේ `fakeupdate.net` වගේ සයිට් එකක් ඕපන් කරලා, ඒක `F11` ගහලා Full Screen දාන එක. එතකොට යාළුවා හිතන්නේ එයාගේ මැෂින් එක ඇත්තටම අප්ඩේට් වෙනවා කියලා. එයා පැය ගාණක් බලන් ඉඳියි!</p>
+                </div>
+
+                <div class="retro-code">
+                    <pre>
+<span class="c-com">// DIGISPARK PAYLOAD: FAKE UPDATE</span>
+#include "DigiKeyboard.h"
+
+void setup() {
+  DigiKeyboard.delay(2000);
+  DigiKeyboard.sendKeyStroke(0);
+  
+  <span class="c-com">// 1. Open Run Dialog</span>
+  DigiKeyboard.sendKeyStroke(KEY_R, MOD_GUI_LEFT);
+  DigiKeyboard.delay(500);
+  
+  <span class="c-com">// 2. Open FakeUpdate.net in Chrome</span>
+  <span class="c-com">// 'kiosk' mode opens it in full screen immediately</span>
+  DigiKeyboard.print(<span class="c-str">"chrome --kiosk http://fakeupdate.net/win10u"</span>);
+  DigiKeyboard.sendKeyStroke(KEY_ENTER);
+  
+  <span class="c-com">// If user doesn't have chrome, use 'start msedge'</span>
+}</pre>
+                </div>
+                
+                <div class="en-text">
+                    <p><strong>Note:</strong> The `--kiosk` flag in Chrome forces the browser into Full Screen mode instantly, and disables the "Press F11 to exit" message. The victim won't know how to close it easily (Alt+F4 still works, but they panic first).</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-31">
+            <h2><span class="level">LVL 03</span> THE HAUNTED MOUSE (JIGGLER)</h2>
+            
+            <div class="content-block">
+                <div class="prank-card">
+                    <span class="prank-icon">👻</span>
+                    <div>
+                        <strong>THE CONCEPT:</strong><br>
+                        The mouse cursor moves randomly every few seconds. It makes clicking on anything extremely difficult.
+                    </div>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>31. හොල්මන් මවුස් එක (Mouse Jiggler)</strong><br>
+                    මේ ස්ක්‍රිප්ට් එකෙන් වෙන්නේ මවුස් කර්සර් (Cursor) එක තත්පර කීපයකට සැරයක් ඉබේම හෙලවෙන එක. මේකේ ප්‍රයෝජන දෙකක් තියෙනවා:<br>
+                    1. <strong>Prank:</strong> යාළුවෙක් මොකක් හරි Click කරන්න යද්දිම මවුස් එක පනිනවා. එයාට හිතෙන්නේ මවුස් එක කැඩිලා කියලා.<br>
+                    2. <strong>Work from Home:</strong> ඔයා ඔන්ලයින් (Teams/Zoom) ඉන්නවා කියලා පෙන්නන්න මේක පාවිච්චි කරන්න පුළුවන්. මැෂින් එක Sleep වෙන්නේ නෑ.</p>
+                </div>
+
+                <div class="retro-code">
+                    <pre>
+<span class="c-com">// DIGISPARK PAYLOAD: MOUSE JIGGLER</span>
+#include "DigiMouse.h" <span class="c-com">// Note: We use DigiMouse library here</span>
+
+void setup() {
+  DigiMouse.begin(); 
+}
+
+void loop() {
+  <span class="c-com">// Move mouse 5 pixels right, 5 pixels down</span>
+  DigiMouse.moveX(5);
+  DigiMouse.moveY(5);
+  DigiMouse.delay(100);
+  
+  <span class="c-com">// Move it back</span>
+  DigiMouse.moveX(-5);
+  DigiMouse.moveY(-5);
+  
+  <span class="c-com">// Wait for a random time (5 to 10 seconds)</span>
+  <span class="c-com">// This makes it look like a "Ghost" touch</span>
+  DigiMouse.delay(random(5000, 10000));
+}</pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-32">
+            <h2><span class="level">LVL 04</span> THE IT ADMIN (NINITE)</h2>
+            
+            <div class="content-block">
+                <div class="en-text">
+                    <p>Let's do something actually useful. Imagine you formatted a PC and need to install Chrome, VLC, Zoom, and 7-Zip. Instead of downloading them one by one, we can use a service called <strong>Ninite</strong> and automate it with BadUSB.</p>
+                </div>
+
+                <div class="si-text">
+                    <p><strong>32. IT Admin උදව්කරු (Automation)</strong><br>
+                    අපි හිතමු ඔයා අලුතින් මැෂින් එකක් ෆෝමැට් කළා කියලා. දැන් ඉතින් Chrome, VLC, Zoom දාන්න පැය ගාණක් යයි. ඒ වෙනුවට අපිට පුළුවන් BadUSB එක ගැහුව ගමන් මේ ඔක්කොම එකපාර ඉන්ස්ටෝල් වෙන ස්ක්‍රිප්ට් එකක් හදන්න.<br>
+                    අපි මේකට **Ninite** කියන වෙබ්සයිට් එකේ කමාන්ඩ්ස් පාවිච්චි කරනවා.</p>
+                </div>
+
+                <div class="retro-code">
+                    <pre>
+<span class="c-com">// DIGISPARK PAYLOAD: INSTANT INSTALLER</span>
+#include "DigiKeyboard.h"
+
+void setup() {
+  DigiKeyboard.delay(2000);
+  DigiKeyboard.sendKeyStroke(0);
+  
+  DigiKeyboard.sendKeyStroke(KEY_R, MOD_GUI_LEFT);
+  DigiKeyboard.delay(500);
+  
+  <span class="c-com">// Downloads and installs Chrome & VLC silently</span>
+  DigiKeyboard.print(<span class="c-str">"powershell -c \"Start-Process -FilePath 'https://ninite.com/chrome-vlc/ninite.exe' -ArgumentList '/silent' -Wait\""</span>);
+  DigiKeyboard.sendKeyStroke(KEY_ENTER);
+  
+  <span class="c-com">// PC is ready in 5 minutes without you touching it!</span>
+}</pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="chapter-33">
+            <h2><span class="level">LVL 05</span> THE CLASSIC RICKROLL</h2>
+            
+            <div class="content-block">
+                <div class="si-text">
+                    <p><strong>33. Rickroll (සම්භාව්‍ය විහිළුව)</strong><br>
+                    BadUSB එකක් හදලා Rickroll එකක් නොකළොත් වැඩක් නෑනේ. මේකෙන් වෙන්නේ පෙන් එක ගැහුව ගමන් යූටියුබ් ඕපන් වෙලා සින්දුව ප්ලේ වෙන එක. ඒ වගේම අපි වොලියුම් (Volume) එක 100% කරලා දානවා.</p>
+                </div>
+
+                <div class="retro-code">
+                    <pre>
+<span class="c-com">// DIGISPARK PAYLOAD: RICKROLL</span>
+#include "DigiKeyboard.h"
+
+void setup() {
+  DigiKeyboard.delay(2000);
+  DigiKeyboard.sendKeyStroke(0);
+  
+  <span class="c-com">// 1. Max Volume (Press Vol Up 50 times)</span>
+  for(int i=0; i<50; i++){
+    DigiKeyboard.sendKeyStroke(0, 128); <span class="c-com">// Media Vol Up Key</span>
+  }
+  
+  <span class="c-com">// 2. Open YouTube</span>
+  DigiKeyboard.sendKeyStroke(KEY_R, MOD_GUI_LEFT);
+  DigiKeyboard.delay(500);
+  DigiKeyboard.print(<span class="c-str">"cmd /c start https://youtu.be/dQw4w9WgXcQ"</span>);
+  DigiKeyboard.sendKeyStroke(KEY_ENTER);
+}</pre>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer>
+        <p>DEV-KUPPIYA RESEARCH LABS | PART 08 OF 10 COMPLETED</p>
+        <p>NEXT MISSION: MOBILE HACKING (BADUSB ON ANDROID)</p>
+    </footer>
+
+</body>
+</html>
